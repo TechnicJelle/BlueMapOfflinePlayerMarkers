@@ -1,0 +1,9 @@
+name: BlueMapOfflinePlayerMarkers
+version: ${project.version}
+main: net.mctechnic.bluemapofflineplayermarkers.main
+api-version: 1.17
+depend:
+  - BlueMap
+author: TechnicJelle
+description: Adds markers where players have logged off to BlueMap
+website: https://github.com/TechnicJelle/

@@ -95,9 +95,13 @@ public final class main extends JavaPlugin implements Listener {
 		getLogger().info("BlueMap Offline Player Markers plugin enabled!");
 
 		getServer().getPluginManager().registerEvents(this, this);
-		for (Player p : Bukkit.getOnlinePlayers()) {
-			removeMarker(p);
-		}
+
+		BlueMapAPI.onEnable(api -> {
+			getLogger().info("API ready!");
+			for (Player p : Bukkit.getOnlinePlayers()) {
+				removeMarker(p);
+			}
+		});
 	}
 
 	@EventHandler

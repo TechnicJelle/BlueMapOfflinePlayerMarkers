@@ -6,14 +6,14 @@
 
     <groupId>net.mctechnic</groupId>
     <artifactId>BlueMapOfflinePlayerMarkers</artifactId>
-    <version>1.0-SNAPSHOT</version>
+    <version>1.0-BETA</version>
     <packaging>jar</packaging>
 
     <name>BlueMapOfflinePlayerMarkers</name>
 
     <description>Adds markers where players have logged off to BlueMap</description>
     <properties>
-        <java.version>1.8</java.version>
+        <java.version>16</java.version>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
     </properties>
     <url>https://github.com/TechnicJelle/</url>
@@ -80,6 +80,7 @@
             <groupId>com.github.BlueMap-Minecraft</groupId>
             <artifactId>BlueMapAPI</artifactId>
             <version>v1.6.0</version>
+            <scope>provided</scope>
         </dependency>
     </dependencies>
 </project>

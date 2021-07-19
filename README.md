@@ -1,6 +1,5 @@
 # BlueMap Offline Player Markers
-Adds markers in the positions where players have logged off to BlueMap\
-https://github.com/BlueMap-Minecraft/BlueMap
+Adds markers in the positions where players have logged off to [BlueMap](https://github.com/BlueMap-Minecraft/BlueMap).
 
 ## [Click here to download!](../../releases/latest)
 

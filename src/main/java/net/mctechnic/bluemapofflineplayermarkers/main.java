@@ -17,7 +17,6 @@ import org.bukkit.plugin.java.JavaPlugin;
 import java.io.IOException;
 import java.util.Optional;
 
-//Big thanks to @JotaFaD and @pop4959 for making their awesome BlueMap addons open-source so I could learn from them
 public final class main extends JavaPlugin implements Listener {
 
 	final String markerSetId = "offplrs";
@@ -93,7 +92,6 @@ public final class main extends JavaPlugin implements Listener {
 
 	@Override
 	public void onEnable() {
-		// Plugin startup logic
 		getLogger().info("BlueMap Offline Player Markers plugin enabled!");
 
 		getServer().getPluginManager().registerEvents(this, this);
@@ -116,7 +114,6 @@ public final class main extends JavaPlugin implements Listener {
 
 	@Override
 	public void onDisable() {
-		// Plugin shutdown logic
 		getLogger().info("BlueMap Offline Player Markers plugin disabled!");
 	}
 }

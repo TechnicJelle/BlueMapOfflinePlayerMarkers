@@ -17,6 +17,7 @@ import org.bukkit.plugin.java.JavaPlugin;
 import java.io.IOException;
 import java.util.Optional;
 
+//Big thanks to @JotaFaD and @pop4959 for making their awesome BlueMap addons open-source so I could learn from them
 public final class main extends JavaPlugin implements Listener {
 
 	final String markerSetId = "offplrs";

@@ -102,6 +102,13 @@ public final class main extends JavaPlugin implements Listener {
 				removeMarker(p);
 			}
 		});
+
+		BlueMapAPI.onDisable(api -> {
+			getLogger().info("API shutting down!");
+			for (Player p : Bukkit.getOnlinePlayers()) {
+				addMarker(p);
+			}
+		});
 	}
 
 	@EventHandler

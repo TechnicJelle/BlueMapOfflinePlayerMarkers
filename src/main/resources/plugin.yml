@@ -6,4 +6,4 @@ depend:
   - BlueMap
 author: TechnicJelle
 description: Adds markers where players have logged off to BlueMap
-website: https://github.com/TechnicJelle/
+website: https://github.com/TechnicJelle/BlueMapOfflinePlayerMarkers

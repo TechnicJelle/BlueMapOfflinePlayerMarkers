@@ -1,5 +1,6 @@
 package net.mctechnic.bluemapofflineplayermarkers;
 
+import com.google.common.net.UrlEscapers;
 import de.bluecolored.bluemap.api.BlueMapAPI;
 import de.bluecolored.bluemap.api.BlueMapMap;
 import de.bluecolored.bluemap.api.BlueMapWorld;
@@ -14,7 +15,13 @@ import org.bukkit.event.player.PlayerJoinEvent;
 import org.bukkit.event.player.PlayerQuitEvent;
 import org.bukkit.plugin.java.JavaPlugin;
 
+import javax.imageio.ImageIO;
+import java.awt.image.BufferedImage;
+import java.io.File;
 import java.io.IOException;
+import java.io.InputStream;
+import java.net.MalformedURLException;
+import java.net.URL;
 import java.util.Optional;
 
 public final class main extends JavaPlugin implements Listener {
@@ -61,7 +68,7 @@ public final class main extends JavaPlugin implements Listener {
 				POIMarker marker = markerSet.createPOIMarker(player.getUniqueId().toString(), map,
 						player.getLocation().getX(), player.getLocation().getY(), player.getLocation().getZ()); //make the marker
 				marker.setLabel(player.getName());
-				marker.setIcon("assets/playerheads/" + player.getUniqueId() + ".png", 4, 4); //images
+				marker.setIcon(createMarkerImage(blueMapAPI, player), 16, 16);
 			}
 		}
 
@@ -94,6 +101,35 @@ public final class main extends JavaPlugin implements Listener {
 				markerSet.removeMarker(player.getUniqueId().toString()));
 
 		getLogger().info("Marker for " + player.getName() + " removed");
+	}
+
+	String createMarkerImage (BlueMapAPI blueMapAPI, Player player) {
+		String pathToModifiedHeadFile = "assets/offlineplayerskins/" + player.getUniqueId() + ".png";
+		BufferedImage image = null;
+
+		URL imageUrl = null;
+		try {
+			imageUrl = new URL("https://crafatar.com/avatars/" + player.getUniqueId() +".png?size=32");
+		} catch (MalformedURLException e) {
+			e.printStackTrace();
+		}
+
+		try {
+			InputStream in = imageUrl.openStream();
+			image = ImageIO.read(in);
+			in.close();
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
+
+		try {
+			blueMapAPI.createImage(image, pathToModifiedHeadFile);
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
+
+		return pathToModifiedHeadFile;
+
 	}
 
 	@Override

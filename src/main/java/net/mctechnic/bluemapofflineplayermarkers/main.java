@@ -16,6 +16,7 @@ import org.bukkit.event.player.PlayerQuitEvent;
 import org.bukkit.plugin.java.JavaPlugin;
 
 import javax.imageio.ImageIO;
+import java.awt.*;
 import java.awt.image.BufferedImage;
 import java.io.File;
 import java.io.IOException;
@@ -25,6 +26,8 @@ import java.net.URL;
 import java.util.Optional;
 
 public final class main extends JavaPlugin implements Listener {
+
+	boolean isDebugBuild = true; // Enables some extra debugging code when true. Disable in production builds
 
 	final String markerSetId = "offplrs";
 	final String markerSetName = "Offline Players";
@@ -104,13 +107,19 @@ public final class main extends JavaPlugin implements Listener {
 	}
 
 	String createMarkerImage (BlueMapAPI blueMapAPI, Player player) {
-		String pathToModifiedPlayerhead = "offlineplayerheads/" + player.getUniqueId() + ".png";
+		String pathToModifiedPlayerhead = "offlineplayerheads/" + player.getUniqueId().toString();
 		BufferedImage image = null;
+
+		// Some debugging
+		if (isDebugBuild) {
+			getLogger().info("UUID of player " + player.getName() + " is " + player.getUniqueId().toString());
+			getLogger().info("Wanted path to marker image: " + pathToModifiedPlayerhead);
+		}
 
 		// Set the url as the crafatar endpoint
 		URL imageUrl = null;
 		try {
-			imageUrl = new URL("https://crafatar.com/avatars/" + player.getUniqueId() +".png?size=32&overlay=true");
+			imageUrl = new URL("https://crafatar.com/avatars/" + player.getUniqueId().toString() +".png?size=32&overlay=true");
 		} catch (MalformedURLException e) {
 			e.printStackTrace();
 		}
@@ -124,6 +133,8 @@ public final class main extends JavaPlugin implements Listener {
 			e.printStackTrace();
 		}
 
+		image = convertToGrayScale(image);
+
 		// Make the image file from the BufferedImage
 		try {
 			pathToModifiedPlayerhead = blueMapAPI.createImage(image, pathToModifiedPlayerhead);
@@ -131,9 +142,26 @@ public final class main extends JavaPlugin implements Listener {
 			e.printStackTrace();
 		}
 
+		// Debugging
+		if (isDebugBuild) {
+			getLogger().info("Actual path to marker image: " + pathToModifiedPlayerhead);
+		}
+
 		// Return the path to the image file
 		return pathToModifiedPlayerhead;
 
+	}
+
+	// Adapted from https://stackoverflow.com/questions/3106269/how-to-use-type-byte-gray-to-efficiently-create-a-grayscale-bufferedimage-using/12860219#12860219
+	BufferedImage convertToGrayScale(BufferedImage image) {
+		BufferedImage result = new BufferedImage(
+				image.getWidth(),
+				image.getHeight(),
+				BufferedImage.TYPE_BYTE_GRAY);
+		Graphics g = result.getGraphics();
+		g.drawImage(image, 0, 0, null);
+		g.dispose();
+		return result;
 	}
 
 	@Override

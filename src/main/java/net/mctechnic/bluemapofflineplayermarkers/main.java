@@ -61,6 +61,7 @@ public final class main extends JavaPlugin implements Listener {
 				POIMarker marker = markerSet.createPOIMarker(player.getUniqueId().toString(), map,
 						player.getLocation().getX(), player.getLocation().getY(), player.getLocation().getZ()); //make the marker
 				marker.setLabel(player.getName());
+				marker.setIcon("assets/playerheads/" + player.getUniqueId() + ".png", 4, 4); //images
 			}
 		}
 

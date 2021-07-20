@@ -27,7 +27,7 @@ import java.util.Optional;
 
 public final class main extends JavaPlugin implements Listener {
 
-	boolean isDebugBuild = true; // Enables some extra debugging code when true. Disable in production builds
+	boolean isDebugBuild = false; // Enables some extra debugging code when true. Disable in production builds
 
 	final String markerSetId = "offplrs";
 	final String markerSetName = "Offline Players";

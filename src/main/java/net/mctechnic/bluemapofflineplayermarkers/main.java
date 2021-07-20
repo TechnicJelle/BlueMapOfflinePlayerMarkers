@@ -104,16 +104,18 @@ public final class main extends JavaPlugin implements Listener {
 	}
 
 	String createMarkerImage (BlueMapAPI blueMapAPI, Player player) {
-		String pathToModifiedHeadFile = "assets/offlineplayerskins/" + player.getUniqueId() + ".png";
+		String pathToModifiedPlayerhead = "offlineplayerheads/" + player.getUniqueId() + ".png";
 		BufferedImage image = null;
 
+		// Set the url as the crafatar endpoint
 		URL imageUrl = null;
 		try {
-			imageUrl = new URL("https://crafatar.com/avatars/" + player.getUniqueId() +".png?size=32");
+			imageUrl = new URL("https://crafatar.com/avatars/" + player.getUniqueId() +".png?size=32&overlay=true");
 		} catch (MalformedURLException e) {
 			e.printStackTrace();
 		}
 
+		// Read the image from the url to a BufferedImage
 		try {
 			InputStream in = imageUrl.openStream();
 			image = ImageIO.read(in);
@@ -122,13 +124,15 @@ public final class main extends JavaPlugin implements Listener {
 			e.printStackTrace();
 		}
 
+		// Make the image file from the BufferedImage
 		try {
-			blueMapAPI.createImage(image, pathToModifiedHeadFile);
+			pathToModifiedPlayerhead = blueMapAPI.createImage(image, pathToModifiedPlayerhead);
 		} catch (IOException e) {
 			e.printStackTrace();
 		}
 
-		return pathToModifiedHeadFile;
+		// Return the path to the image file
+		return pathToModifiedPlayerhead;
 
 	}
 

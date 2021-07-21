@@ -1,6 +1,5 @@
 package net.mctechnic.bluemapofflineplayermarkers;
 
-import com.google.common.net.UrlEscapers;
 import de.bluecolored.bluemap.api.BlueMapAPI;
 import de.bluecolored.bluemap.api.BlueMapMap;
 import de.bluecolored.bluemap.api.BlueMapWorld;
@@ -25,14 +24,44 @@ import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.Optional;
 
+import static org.bukkit.util.NumberConversions.round;
+
 public final class main extends JavaPlugin implements Listener {
 
-	boolean isDebugBuild = false; // Enables some extra debugging code when true. Disable in production builds
+	private boolean useBlueMapSource = true;
 
-	final String markerSetId = "offplrs";
-	final String markerSetName = "Offline Players";
+	public final String markerSetId = "offplrs";
+	public final String markerSetName = "Offline Players";
 
-	void addMarker(Player player) {
+	public static void recolour(BufferedImage image) {
+		for (int y = 0; y < image.getHeight(); y++) {
+			for (int x = 0; x < image.getWidth(); x++) {
+				int rgb = image.getRGB(x, y);
+				int red = (rgb >> 16) & 0x0ff;
+				int green = (rgb >> 8) & 0x0ff;
+				int blue = (rgb) & 0x0ff;
+
+				//https://tannerhelland.com/2011/10/01/grayscale-image-algorithm-vb6.html
+//				int grey = (red + green + blue) / 3; //average
+				int grey = round(red * 0.3 + green * 0.59 + blue * 0.11); //luma
+				Color c = new Color(grey, grey, grey);
+				image.setRGB(x, y, c.getRGB());
+			}
+		}
+	}
+
+	public static BufferedImage resize(BufferedImage image, int newW, int newH) {
+		Image scaled = image.getScaledInstance(newW, newH, Image.SCALE_FAST);
+		BufferedImage result = new BufferedImage(newW, newH, BufferedImage.TYPE_BYTE_GRAY);
+
+		Graphics2D g2d = result.createGraphics();
+		g2d.drawImage(scaled, 0, 0, null);
+		g2d.dispose();
+
+		return result;
+	}
+
+	public void addMarker(Player player) {
 		BlueMapAPI.getInstance().ifPresent(blueMapAPI -> {
 			MarkerAPI markerAPI;
 
@@ -53,7 +82,7 @@ public final class main extends JavaPlugin implements Listener {
 		});
 	}
 
-	void addMarker(BlueMapAPI blueMapAPI, MarkerAPI markerAPI, Player player) {
+	public void addMarker(BlueMapAPI blueMapAPI, MarkerAPI markerAPI, Player player) {
 		MarkerSet markerSet;
 
 		if (markerAPI.getMarkerSet(markerSetId).isEmpty()) {
@@ -71,14 +100,32 @@ public final class main extends JavaPlugin implements Listener {
 				POIMarker marker = markerSet.createPOIMarker(player.getUniqueId().toString(), map,
 						player.getLocation().getX(), player.getLocation().getY(), player.getLocation().getZ()); //make the marker
 				marker.setLabel(player.getName());
-				marker.setIcon(createMarkerImage(blueMapAPI, player), 16, 16);
+
+				BufferedImage image;
+				if(useBlueMapSource) {
+					image = getBImgFromFile(player);
+				} else {
+					image = getBImgFromURL(player);
+				}
+				if (image == null) return;
+
+				recolour(image);
+				image = resize(image, 32, 32);
+
+				try {
+					String imagePath = blueMapAPI.createImage(image, "offlineplayerheads/" + player.getUniqueId());
+					marker.setIcon(imagePath, image.getWidth() / 2, image.getHeight() / 2);
+				} catch (IOException e) {
+					e.printStackTrace();
+					return;
+				}
 			}
 		}
 
 		getLogger().info("Marker for " + player.getName() + " added");
 	}
 
-	void removeMarker(Player player) {
+	public void removeMarker(Player player) {
 		BlueMapAPI.getInstance().ifPresent(blueMapAPI -> {
 			MarkerAPI markerAPI;
 
@@ -99,68 +146,41 @@ public final class main extends JavaPlugin implements Listener {
 		});
 	}
 
-	void removeMarker(MarkerAPI markerAPI, Player player) {
+	public void removeMarker(MarkerAPI markerAPI, Player player) {
 		markerAPI.getMarkerSet(markerSetId).ifPresent(markerSet ->
 				markerSet.removeMarker(player.getUniqueId().toString()));
 
 		getLogger().info("Marker for " + player.getName() + " removed");
 	}
 
-	String createMarkerImage (BlueMapAPI blueMapAPI, Player player) {
-		String pathToModifiedPlayerhead = "offlineplayerheads/" + player.getUniqueId().toString();
-		BufferedImage image = null;
-
-		// Some debugging
-		if (isDebugBuild) {
-			getLogger().info("UUID of player " + player.getName() + " is " + player.getUniqueId().toString());
-			getLogger().info("Wanted path to marker image: " + pathToModifiedPlayerhead);
-		}
-
-		// Set the url as the crafatar endpoint
-		URL imageUrl = null;
+	BufferedImage getBImgFromFile(Player player) {
+		BufferedImage result;
+		File f = new File("bluemap/web/assets/playerheads/" + player.getUniqueId() + ".png"); //TODO: make this work for non-default webroots too
 		try {
-			imageUrl = new URL("https://crafatar.com/avatars/" + player.getUniqueId().toString() +".png?size=32&overlay=true");
-		} catch (MalformedURLException e) {
-			e.printStackTrace();
-		}
-
-		// Read the image from the url to a BufferedImage
-		try {
-			InputStream in = imageUrl.openStream();
-			image = ImageIO.read(in);
-			in.close();
+			result = ImageIO.read(f);
 		} catch (IOException e) {
 			e.printStackTrace();
+			return null;
 		}
-
-		image = convertToGrayScale(image);
-
-		// Make the image file from the BufferedImage
-		try {
-			pathToModifiedPlayerhead = blueMapAPI.createImage(image, pathToModifiedPlayerhead);
-		} catch (IOException e) {
-			e.printStackTrace();
-		}
-
-		// Debugging
-		if (isDebugBuild) {
-			getLogger().info("Actual path to marker image: " + pathToModifiedPlayerhead);
-		}
-
-		// Return the path to the image file
-		return pathToModifiedPlayerhead;
-
+		return result;
 	}
 
-	// Adapted from https://stackoverflow.com/questions/3106269/how-to-use-type-byte-gray-to-efficiently-create-a-grayscale-bufferedimage-using/12860219#12860219
-	BufferedImage convertToGrayScale(BufferedImage image) {
-		BufferedImage result = new BufferedImage(
-				image.getWidth(),
-				image.getHeight(),
-				BufferedImage.TYPE_BYTE_GRAY);
-		Graphics g = result.getGraphics();
-		g.drawImage(image, 0, 0, null);
-		g.dispose();
+	BufferedImage getBImgFromURL(Player player) {
+		BufferedImage result;
+		try {
+			URL imageUrl = new URL("https://crafatar.com/avatars/" + player.getUniqueId() + ".png?size=8&overlay=true"); //TODO: get from config later on (see #8)
+			try {
+				InputStream in = imageUrl.openStream();
+				result = ImageIO.read(in);
+				in.close();
+			} catch (IOException e) {
+				e.printStackTrace();
+				return null;
+			}
+		} catch (MalformedURLException e) {
+			e.printStackTrace();
+			return null;
+		}
 		return result;
 	}
 
@@ -172,6 +192,7 @@ public final class main extends JavaPlugin implements Listener {
 
 		BlueMapAPI.onEnable(blueMapAPI -> {
 			getLogger().info("API ready!");
+			useBlueMapSource = true; //TODO: Get from config later on (see #8)
 			Bukkit.getScheduler().runTaskAsynchronously(this, () -> {
 				MarkerAPI markerAPI;
 

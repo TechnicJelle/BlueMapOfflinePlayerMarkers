@@ -7,3 +7,22 @@ depend:
 author: TechnicJelle
 description: Adds markers where players have logged off to BlueMap
 website: https://github.com/TechnicJelle/BlueMapOfflinePlayerMarkers
+commands:
+  offlinemarkers:
+    usage: /offlinemarkers [load|reset]
+    description: Loads offline player markers from playerdata files or clears the markerset
+    permission: bluemapofflineplayermarkers.commands.offlinemarkers
+permissions:
+  bluemapofflineplayermarkers.*:
+    children:
+      bluemapofflineplayermarkers.commands.*: true
+    default: op
+    description: All permissions for the BlueMapOfflinePlayerMarkers plugin
+  bluemapofflineplayermarkers.commands.*:
+    children:
+      bluemapofflineplayermarkers.commands.offlinemarkers: true
+    default: op
+    description: Permission for all commands
+  bluemapofflineplayermarkers.commands.offlinemarkers:
+    default: op
+    description: Permission for the /offlinemarkers command

@@ -1,5 +1,6 @@
 package net.mctechnic.bluemapofflineplayermarkers;
 
+import com.google.common.net.UrlEscapers;
 import de.bluecolored.bluemap.api.BlueMapAPI;
 import de.bluecolored.bluemap.api.BlueMapMap;
 import de.bluecolored.bluemap.api.BlueMapWorld;
@@ -14,10 +15,19 @@ import org.bukkit.event.player.PlayerJoinEvent;
 import org.bukkit.event.player.PlayerQuitEvent;
 import org.bukkit.plugin.java.JavaPlugin;
 
+import javax.imageio.ImageIO;
+import java.awt.*;
+import java.awt.image.BufferedImage;
+import java.io.File;
 import java.io.IOException;
+import java.io.InputStream;
+import java.net.MalformedURLException;
+import java.net.URL;
 import java.util.Optional;
 
 public final class main extends JavaPlugin implements Listener {
+
+	boolean isDebugBuild = false; // Enables some extra debugging code when true. Disable in production builds
 
 	final String markerSetId = "offplrs";
 	final String markerSetName = "Offline Players";
@@ -61,7 +71,7 @@ public final class main extends JavaPlugin implements Listener {
 				POIMarker marker = markerSet.createPOIMarker(player.getUniqueId().toString(), map,
 						player.getLocation().getX(), player.getLocation().getY(), player.getLocation().getZ()); //make the marker
 				marker.setLabel(player.getName());
-				marker.setIcon("assets/playerheads/" + player.getUniqueId() + ".png", 4, 4); //images
+				marker.setIcon(createMarkerImage(blueMapAPI, player), 16, 16);
 			}
 		}
 
@@ -94,6 +104,64 @@ public final class main extends JavaPlugin implements Listener {
 				markerSet.removeMarker(player.getUniqueId().toString()));
 
 		getLogger().info("Marker for " + player.getName() + " removed");
+	}
+
+	String createMarkerImage (BlueMapAPI blueMapAPI, Player player) {
+		String pathToModifiedPlayerhead = "offlineplayerheads/" + player.getUniqueId().toString();
+		BufferedImage image = null;
+
+		// Some debugging
+		if (isDebugBuild) {
+			getLogger().info("UUID of player " + player.getName() + " is " + player.getUniqueId().toString());
+			getLogger().info("Wanted path to marker image: " + pathToModifiedPlayerhead);
+		}
+
+		// Set the url as the crafatar endpoint
+		URL imageUrl = null;
+		try {
+			imageUrl = new URL("https://crafatar.com/avatars/" + player.getUniqueId().toString() +".png?size=32&overlay=true");
+		} catch (MalformedURLException e) {
+			e.printStackTrace();
+		}
+
+		// Read the image from the url to a BufferedImage
+		try {
+			InputStream in = imageUrl.openStream();
+			image = ImageIO.read(in);
+			in.close();
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
+
+		image = convertToGrayScale(image);
+
+		// Make the image file from the BufferedImage
+		try {
+			pathToModifiedPlayerhead = blueMapAPI.createImage(image, pathToModifiedPlayerhead);
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
+
+		// Debugging
+		if (isDebugBuild) {
+			getLogger().info("Actual path to marker image: " + pathToModifiedPlayerhead);
+		}
+
+		// Return the path to the image file
+		return pathToModifiedPlayerhead;
+
+	}
+
+	// Adapted from https://stackoverflow.com/questions/3106269/how-to-use-type-byte-gray-to-efficiently-create-a-grayscale-bufferedimage-using/12860219#12860219
+	BufferedImage convertToGrayScale(BufferedImage image) {
+		BufferedImage result = new BufferedImage(
+				image.getWidth(),
+				image.getHeight(),
+				BufferedImage.TYPE_BYTE_GRAY);
+		Graphics g = result.getGraphics();
+		g.drawImage(image, 0, 0, null);
+		g.dispose();
+		return result;
 	}
 
 	@Override

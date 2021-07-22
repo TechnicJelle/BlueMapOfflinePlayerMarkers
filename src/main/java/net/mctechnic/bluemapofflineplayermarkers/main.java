@@ -29,6 +29,7 @@ import static org.bukkit.util.NumberConversions.round;
 public final class main extends JavaPlugin implements Listener {
 
 	private boolean useBlueMapSource = true;
+	private boolean verboseErrors = true;
 
 	public final String markerSetId = "offplrs";
 	public final String markerSetName = "Offline Players";
@@ -156,11 +157,26 @@ public final class main extends JavaPlugin implements Listener {
 	BufferedImage getBImgFromFile(Player player) {
 		BufferedImage result;
 		File f = new File("bluemap/web/assets/playerheads/" + player.getUniqueId() + ".png"); //TODO: make this work for non-default webroots too
-		try {
-			result = ImageIO.read(f);
-		} catch (IOException e) {
-			e.printStackTrace();
-			return null;
+		if(f.exists()) {
+			try {
+				result = ImageIO.read(f);
+			} catch (IOException e) {
+				e.printStackTrace();
+				return null;
+			}
+		} else {
+			getLogger().warning("Marker for " + player.getName() + " couldn't be added!" + (verboseErrors ? "" : " (config: verboseErrors)"));
+			if(verboseErrors) {
+				getLogger().warning(" Couldn't find the playerhead image file in BlueMap's resources");
+				getLogger().warning(" This is likely due to the fact that BlueMap was installed after they last logged off");
+				getLogger().warning(" Falling back to a Steve skin");
+			}
+			try {
+				result = ImageIO.read(new File("bluemap/web/assets/steve.png"));
+			} catch (IOException e) {
+				e.printStackTrace();
+				return null;
+			}
 		}
 		return result;
 	}
@@ -192,7 +208,10 @@ public final class main extends JavaPlugin implements Listener {
 
 		BlueMapAPI.onEnable(blueMapAPI -> {
 			getLogger().info("API ready!");
-			useBlueMapSource = true; //TODO: Get from config later on (see #8)
+			//TODO: Get these from the config later on (see #8)
+			useBlueMapSource = true;
+			verboseErrors = true;
+
 			Bukkit.getScheduler().runTaskAsynchronously(this, () -> {
 				MarkerAPI markerAPI;
 

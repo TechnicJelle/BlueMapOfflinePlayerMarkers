@@ -35,6 +35,7 @@ import java.io.InputStream;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.*;
+import java.util.function.Consumer;
 import java.util.stream.Collectors;
 
 import static org.bukkit.util.NumberConversions.round;
@@ -228,8 +229,12 @@ public final class main extends JavaPlugin implements Listener {
 
 		PluginCommand offlineMarkers = Bukkit.getPluginCommand("offlinemarkers");
 		OfflineMarkers executor = new OfflineMarkers(this);
-		offlineMarkers.setExecutor(executor);
-		offlineMarkers.setTabCompleter(executor);
+		if (offlineMarkers != null) {
+			offlineMarkers.setExecutor(executor);
+			offlineMarkers.setTabCompleter(executor);
+		} else {
+			getLogger().warning("offlineMarkers is null. This is not good");
+		}
 
 		BlueMapAPI.onEnable(blueMapAPI -> {
 			getLogger().info("API ready!");
@@ -279,7 +284,7 @@ public final class main extends JavaPlugin implements Listener {
 		}
 
 		for (Player p : Bukkit.getOnlinePlayers()) {
-			addMarker(blueMapAPI, markerAPI, p);
+			addMarker(blueMapAPI, markerAPI, p, p.getLocation());
 		}
 
 		try {
@@ -324,10 +329,10 @@ public final class main extends JavaPlugin implements Listener {
 		if(!playerDataFolder.exists() || !playerDataFolder.isDirectory()) return;
 
 		for(OfflinePlayer op : Bukkit.getOfflinePlayers()){
-			//If player is online, ignore (Idk why the method is called "getOfflinePlayers" when it also contains all online players...)
+			//If player is online, ignore (I don't know why the method is called "getOfflinePlayers" when it also contains all online players...)
 			if(op.isOnline()) continue;
 
-			File dataFile = new File(playerDataFolder, op.getUniqueId().toString() + ".dat");
+			File dataFile = new File(playerDataFolder, op.getUniqueId() + ".dat");
 
 			//Failsafe if playerdata doesn't exist (should be impossible but whatever)
 			if(!dataFile.exists()) continue;
@@ -344,7 +349,7 @@ public final class main extends JavaPlugin implements Listener {
 			//Collect data
 			long worldUUIDLeast = (long) nbtData.get("WorldUUIDLeast").getValue();
 			long worldUUIDMost = (long) nbtData.get("WorldUUIDMost").getValue();
-			List<Double> position = ((List<DoubleTag>) nbtData.get("Pos").getValue()).stream().map(tag -> tag.getValue()).collect(Collectors.toList());
+			List<Double> position = ((List<DoubleTag>) nbtData.get("Pos").getValue()).stream().map(DoubleTag::getValue).collect(Collectors.toList());
 
 			//Convert to location
 			UUID worldUUID = new UUID(worldUUIDMost, worldUUIDLeast);

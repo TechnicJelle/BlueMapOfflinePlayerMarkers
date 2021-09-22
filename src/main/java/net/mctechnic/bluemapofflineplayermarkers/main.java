@@ -213,11 +213,18 @@ public final class main extends JavaPlugin implements Listener {
 		return result;
 	}
 
+	Consumer<BlueMapAPI> onDisableListener = blueMapAPI -> {
+		getLogger().info("API shutting down!");
+		//No async on shutdown, otherwise BlueMap might have already shut down
+		markAllOnlinePlayers(blueMapAPI);
+	};
+
 	@Override
 	public void onEnable() {
 		getLogger().info("BlueMap Offline Player Markers plugin enabled!");
 
 		getServer().getPluginManager().registerEvents(this, this);
+		loadConfig();
 
 		PluginCommand offlineMarkers = Bukkit.getPluginCommand("offlinemarkers");
 		OfflineMarkers executor = new OfflineMarkers(this);
@@ -226,54 +233,60 @@ public final class main extends JavaPlugin implements Listener {
 
 		BlueMapAPI.onEnable(blueMapAPI -> {
 			getLogger().info("API ready!");
-			//TODO: Get these from the config later on (see #8)
-			useBlueMapSource = true;
-			verboseErrors = true;
+			loadConfig();
 
-			Bukkit.getScheduler().runTaskAsynchronously(this, () -> {
-				MarkerAPI markerAPI;
-
-				try {
-					markerAPI = blueMapAPI.getMarkerAPI();
-				} catch (IOException e) {
-					e.printStackTrace();
-					return;
-				}
-
-				for (Player p : Bukkit.getOnlinePlayers()) {
-					removeMarker(markerAPI, p);
-				}
-
-				try {
-					markerAPI.save();
-				} catch (IOException e) {
-					e.printStackTrace();
-				}
-			});
+			//Async on startup
+			Bukkit.getScheduler().runTaskAsynchronously(this, () ->
+					removeAllOnlinePlayers(blueMapAPI));
 		});
 
-		BlueMapAPI.onDisable(blueMapAPI -> {
-			getLogger().info("API shutting down!");
-			//No async on shutdown, otherwise BlueMap might have already shut down
-			MarkerAPI markerAPI;
+		BlueMapAPI.onDisable(onDisableListener);
+	}
 
-			try {
-				markerAPI = blueMapAPI.getMarkerAPI();
-			} catch (IOException e) {
-				e.printStackTrace();
-				return;
-			}
+	private void loadConfig() {
+		//TODO: Get these from the config later on (see #8)
+		useBlueMapSource = true;
+		verboseErrors = true;
+	}
 
-			for (Player p : Bukkit.getOnlinePlayers()) {
-				addMarker(blueMapAPI, markerAPI, p, p.getLocation());
-			}
+	private void removeAllOnlinePlayers(BlueMapAPI blueMapAPI) {
+		MarkerAPI markerAPI;
 
-			try {
-				markerAPI.save();
-			} catch (IOException e) {
-				e.printStackTrace();
-			}
-		});
+		try {
+			markerAPI = blueMapAPI.getMarkerAPI();
+		} catch (IOException e) {
+			e.printStackTrace();
+			return;
+		}
+
+		for (Player p : Bukkit.getOnlinePlayers()) {
+			removeMarker(markerAPI, p);
+		}
+
+    for (Player p : Bukkit.getOnlinePlayers()) {
+      addMarker(blueMapAPI, markerAPI, p, p.getLocation());
+    }
+  }
+
+	private void markAllOnlinePlayers(BlueMapAPI blueMapAPI) {
+		MarkerAPI markerAPI;
+
+		try {
+			markerAPI = blueMapAPI.getMarkerAPI();
+		} catch (IOException e) {
+			e.printStackTrace();
+			return;
+		}
+
+		for (Player p : Bukkit.getOnlinePlayers()) {
+			addMarker(blueMapAPI, markerAPI, p);
+		}
+
+		try {
+			markerAPI.save();
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
 	}
 
 	public void resetMarkers(){
@@ -368,6 +381,8 @@ public final class main extends JavaPlugin implements Listener {
 
 	@Override
 	public void onDisable() {
+		BlueMapAPI.getInstance().ifPresent(this::markAllOnlinePlayers);
+		BlueMapAPI.unregisterListener(onDisableListener);
 		getLogger().info("BlueMap Offline Player Markers plugin disabled!");
 	}
 }

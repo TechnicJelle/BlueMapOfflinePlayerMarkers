@@ -10,7 +10,13 @@
 # Reqn
 # Tested on paper 1.17 only 
 
-command /addserver <string>: # For automated input of the 3 defaukt dimensions /addserver <worldname>
+on skript load: # Set the default world names
+	delete {dimensions::*}
+	add "overworld" to {dimensions::*}
+	add "nether" to {dimensions::*}
+	add "end" to {dimensions::*}
+
+command /addserver <string>: # For automated input of the 3 default dimensions /addserver <worldname>
 	executable by: console
 	trigger:
 		make console execute command "mv import archiveservers/%arg-1%/overworld NORMAL"
@@ -20,7 +26,7 @@ command /addserver <string>: # For automated input of the 3 defaukt dimensions /
 		loop {dimensions::*}:
 			add loop-value to {bluemapservers::%arg-1%.dimensions::*}
 
-command /addworld <string> <string>: # For automated input of SINGLE dimension named overworld /addworld <servername>
+command /addworld <string> <string>: # For automated input of SINGLE dimension named the second argument /addworld <servername> <dimensionname>
 	trigger:
 		make console execute command "mv import archiveservers/%arg-1%/%arg-2% NORMAL"
 		if {bluemapservers::*} doesn't contain arg-1:

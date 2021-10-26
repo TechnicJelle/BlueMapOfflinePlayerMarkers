@@ -10,11 +10,12 @@
 # Tested on paper 1.17 only 
 
 
-command /addworld <string>: #For automated input of SINGLE dimension named overworld /addworld <servername>
+command /addworld <string> <string>: #For automated input of SINGLE dimension named overworld /addworld <servername>
 	trigger:
-		make console execute command "mv import archiveservers/%arg-1%/overworld NORMAL"
-		add arg-1 to {bluemapservers::*}
-		add "overworld" to {bluemapservers::%arg-1%.dimensions::*}
+		make console execute command "mv import archiveservers/%arg-1%/%arg-2% NORMAL"
+		if {bluemapservers::*} doesn't contain arg-1:
+			add arg-1 to {bluemapservers::*}
+		add arg-2 to {bluemapservers::%arg-1%.dimensions::*}
 		
 command /addserver <string>: # For automated input of 3 Dimensions /addserver <worldname>
 	executable by: console

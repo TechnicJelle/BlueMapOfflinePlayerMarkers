@@ -1,0 +1,99 @@
+# This is a concept for loading from playerdata in a folder named "ROOTDIR(e.g server.properties)/archiveservers/<servername>/<overworld, nether and end> the name of the worlds are set
+# Region files must be in ROOTDIR of world and not in DIM-1 for example
+# level.dat must exist in the world folder
+
+# Plugins required:
+# Skript
+# SkBee
+# skUtilities
+# Multiverse
+# Tested on paper 1.17 only 
+
+
+command /addworld <string>: #For automated input of SINGLE dimension named overworld /addworld <servername>
+	trigger:
+		make console execute command "mv import archiveservers/%arg-1%/overworld NORMAL"
+		add arg-1 to {bluemapservers::*}
+		add "overworld" to {bluemapservers::%arg-1%.dimensions::*}
+		
+command /addserver <string>: # For automated input of 3 Dimensions /addserver <worldname>
+	executable by: console
+	trigger:
+		make console execute command "mv import archiveservers/%arg-1%/overworld NORMAL"
+		make console execute command "mv import archiveservers/%arg-1%/nether NORMAL"
+		make console execute command "mv import archiveservers/%arg-1%/end NORMAL"
+		add arg-1 to {bluemapservers::*}
+		loop {dimensions::*}:
+			add loop-value to {bluemapservers::%arg-1%.dimensions::*}
+			
+command /removeallworlds <string>: #For automated removal of dimensions /removeallworlds <servername>
+	trigger:
+		loop {bluemapservers::%arg-1%.dimensions::*}:
+			make console execute command "mv remove archiveservers/%arg-1%/%loop-value%"
+		delete {bluemapservers::%arg-1%}
+			
+command /offlinemarkers [<string>] [<string>]:
+	executable by: console
+	trigger:
+		if arg-1 is "reset": # Deletes all markers for on the server /offlinemarkers reset all
+			if arg-2 is "all":
+				loop {bluemapservers::*}:
+					loop {bluemapservers::%loop-value-1%.activemarkers::*}:
+						message "Server: %loop-value-1%"
+						loop {bluemapservers::%arg-1%.dimensions::*}:
+							message "World: %loop-value-2%"
+							make console execute command "/bluemap marker remove %loop-value-1%_%loop-value-3%_%loop-value-2%"
+
+							remove loop-value-2 from {bluemapservers::%loop-value-1%.activemarkers::*}
+			else: # Deletes single servers' markers
+				loop {bluemapservers::%arg-2%.dimensions::*}:
+					loop {bluemapservers::%arg-2%.activemarkers::*}:
+						message "World: %loop-value-1%"
+						make console execute command "/bluemap marker remove %arg-2%_%loop-value-1%_%loop-value-2%"
+				delete {bluemapservers::%arg-2%.activemarkers::*}
+			stop
+		loop {bluemapservers::*}: # Default loop with no arguments 
+			if {bluemapservers::%loop-value-1%.activemarkers::*} is not set: # If markers don't already exist
+				message "Server: %loop-value-1%"
+				loop {bluemapservers::%loop-value-1%.dimensions::*}: # Loop the dimension names
+					message "World: %loop-value-2%"
+					loop directory "archiveservers/%loop-value-1%/overworld/playerdata/"'s files: # Loop all the playerdata files on HOST in a specified world
+						if loop-value-3 doesn't contain "old": # Ignore .old file
+							set {_start} to length of loop-value-3 # Set to length of file name
+							remove 39 from {_start} # Remove .dat
+							set {_clean} to subtext of loop-value-3 from characters {_start} to length of loop-value-3 
+							set {_uuid} to subtext of {_clean} from characters 1 to 36 #Get just the UUID
+							set {_n} to nbt compound of file "archiveservers/%loop-value-1%/overworld/playerdata/%{_clean}%" # Set {_n} to the NBT variables
+							set {_pos::*} to tag "Pos" of {_n} # Loop x,y,z 
+							set {_dim} to tag "Dimension" of {_n}
+							send a request to "https://example.com" # There is a bug in a addon - This fixes it
+							if {_dim} contains "minecraft:": # 1.16 Dimension name change
+								set {_dim} to subtext of {_dim} from characters 11 to length of {_dim}
+							else:
+								if {_dim} = 0:
+									set {_dim} to "overworld" # This is the old way
+								if {_dim} = -1:
+									set {_dim} to "nether"
+								if {_dim} = 1:
+									set {_dim} to "end"
+							if {_dim} contains loop-value-2: # Loop all the dimensions 
+								send a request to "https://minecraft-api.com/api/pseudo/%{_uuid}%/pseudo" # Translate the UUID into a username
+								set {_resp} to the last http response
+								set {_username} to {_resp}'s body #  Storing it
+								if {_username} doesn't contain "Player not found !": # Unkown UUID
+									if {bluemapservers::%loop-value-1%.activemarkers::*} doesn't contain {_uuid}: # If it does not already exist... add the marker
+										add "%{_uuid}%" to {bluemapservers::%loop-value-1%.activemarkers::*}
+										make console execute command "/addmarker %loop-value-1%_%loop-value-2%_%{_uuid}% %loop-value-1%_%loop-value-2% %{_pos::1}% %{_pos::2}% %{_pos::3}% %{_username}%"
+			else:
+				message "Markers for %loop-value-1% are already set." # Obvious
+		message "Updated!" # Done
+
+command /addmarker <string> <string> <string> <string> <string> <string>:
+	trigger:
+		make console execute command "/bluemap marker create %arg-1% %arg-2% %arg-3% %arg-4% %arg-5% %arg-6%" # Another bug adoivdance - From BlueMap not working when using the normal Skript way
+
+command /removeworld <string> <string>:
+	trigger:
+		remove arg-2 from {bluemapservers::%arg-1%.dimensions::*} # Remove single dimensions /removeworld <servername> <worldname>
+		make console execute command "/mv remove archiveservers/%arg-1%/%arg-2%"
+		message "%{bluemapservers::%arg-1%.dimensions::*}%"

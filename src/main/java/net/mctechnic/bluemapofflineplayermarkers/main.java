@@ -348,6 +348,7 @@ public final class main extends JavaPlugin implements Listener {
 			//Collect data
 			long worldUUIDLeast = (long) nbtData.get("WorldUUIDLeast").getValue();
 			long worldUUIDMost = (long) nbtData.get("WorldUUIDMost").getValue();
+			@SuppressWarnings("unchecked") //Apparently this is just how it should be https://discord.com/channels/665868367416131594/771451216499965953/917450319259115550
 			List<Double> position = ((List<DoubleTag>) nbtData.get("Pos").getValue()).stream().map(DoubleTag::getValue).toList();
 
 			//Convert to location

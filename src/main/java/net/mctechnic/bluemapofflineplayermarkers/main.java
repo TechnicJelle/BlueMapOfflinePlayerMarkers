@@ -24,17 +24,17 @@ import org.bukkit.event.player.PlayerQuitEvent;
 import org.bukkit.plugin.java.JavaPlugin;
 
 import javax.imageio.ImageIO;
+import java.awt.*;
 import java.awt.image.BufferedImage;
-import java.awt.Color;
-import java.awt.Image;
-import java.awt.Graphics2D;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.MalformedURLException;
 import java.net.URL;
-import java.util.*;
+import java.util.List;
+import java.util.Optional;
+import java.util.UUID;
 import java.util.function.Consumer;
 
 import static org.bukkit.util.NumberConversions.round;
@@ -117,7 +117,7 @@ public final class main extends JavaPlugin implements Listener {
 
 				BufferedImage image;
 				if(useBlueMapSource) {
-					image = getBImgFromFile(player);
+					image = getBImgFromFile(blueMapAPI, player);
 				} else {
 					image = getBImgFromURL(player);
 				}
@@ -167,9 +167,9 @@ public final class main extends JavaPlugin implements Listener {
 		getLogger().info("Marker for " + player.getName() + " removed");
 	}
 
-	BufferedImage getBImgFromFile(OfflinePlayer player) {
+	BufferedImage getBImgFromFile(BlueMapAPI blueMapAPI, OfflinePlayer player) {
 		BufferedImage result;
-		File f = new File("bluemap/web/assets/playerheads/" + player.getUniqueId() + ".png"); //TODO: make this work for non-default webroots too
+		File f = new File(blueMapAPI.getWebRoot() + "/assets/playerheads/" + player.getUniqueId() + ".png");
 		if(f.exists()) {
 			try {
 				result = ImageIO.read(f);
@@ -185,7 +185,7 @@ public final class main extends JavaPlugin implements Listener {
 				getLogger().warning(" Falling back to a Steve skin");
 			}
 			try {
-				result = ImageIO.read(new File("bluemap/web/assets/steve.png"));
+				result = ImageIO.read(new File(blueMapAPI.getWebRoot() + "/assets/steve.png"));
 			} catch (IOException e) {
 				e.printStackTrace();
 				return null;

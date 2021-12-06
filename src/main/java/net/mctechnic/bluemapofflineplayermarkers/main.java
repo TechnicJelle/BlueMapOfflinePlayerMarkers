@@ -36,7 +36,6 @@ import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.*;
 import java.util.function.Consumer;
-import java.util.stream.Collectors;
 
 import static org.bukkit.util.NumberConversions.round;
 
@@ -349,7 +348,7 @@ public final class main extends JavaPlugin implements Listener {
 			//Collect data
 			long worldUUIDLeast = (long) nbtData.get("WorldUUIDLeast").getValue();
 			long worldUUIDMost = (long) nbtData.get("WorldUUIDMost").getValue();
-			List<Double> position = ((List<DoubleTag>) nbtData.get("Pos").getValue()).stream().map(DoubleTag::getValue).collect(Collectors.toList());
+			List<Double> position = ((List<DoubleTag>) nbtData.get("Pos").getValue()).stream().map(DoubleTag::getValue).toList();
 
 			//Convert to location
 			UUID worldUUID = new UUID(worldUUIDMost, worldUUIDLeast);

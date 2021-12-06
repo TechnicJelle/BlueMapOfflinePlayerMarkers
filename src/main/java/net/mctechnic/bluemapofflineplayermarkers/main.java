@@ -1,12 +1,21 @@
 package net.mctechnic.bluemapofflineplayermarkers;
 
+import com.flowpowered.nbt.CompoundMap;
+import com.flowpowered.nbt.CompoundTag;
+import com.flowpowered.nbt.DoubleTag;
+import com.flowpowered.nbt.stream.NBTInputStream;
 import de.bluecolored.bluemap.api.BlueMapAPI;
 import de.bluecolored.bluemap.api.BlueMapMap;
 import de.bluecolored.bluemap.api.BlueMapWorld;
 import de.bluecolored.bluemap.api.marker.MarkerAPI;
 import de.bluecolored.bluemap.api.marker.MarkerSet;
 import de.bluecolored.bluemap.api.marker.POIMarker;
+import net.mctechnic.bluemapofflineplayermarkers.commands.OfflineMarkers;
 import org.bukkit.Bukkit;
+import org.bukkit.Location;
+import org.bukkit.OfflinePlayer;
+import org.bukkit.World;
+import org.bukkit.command.PluginCommand;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
@@ -15,15 +24,19 @@ import org.bukkit.event.player.PlayerQuitEvent;
 import org.bukkit.plugin.java.JavaPlugin;
 
 import javax.imageio.ImageIO;
-import java.awt.*;
 import java.awt.image.BufferedImage;
+import java.awt.Color;
+import java.awt.Image;
+import java.awt.Graphics2D;
 import java.io.File;
+import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.MalformedURLException;
 import java.net.URL;
-import java.util.Optional;
+import java.util.*;
 import java.util.function.Consumer;
+import java.util.stream.Collectors;
 
 import static org.bukkit.util.NumberConversions.round;
 
@@ -74,7 +87,7 @@ public final class main extends JavaPlugin implements Listener {
 				return;
 			}
 
-			addMarker(blueMapAPI, markerAPI, player);
+			addMarker(blueMapAPI, markerAPI, player, player.getLocation());
 
 			try {
 				markerAPI.save();
@@ -84,7 +97,7 @@ public final class main extends JavaPlugin implements Listener {
 		});
 	}
 
-	public void addMarker(BlueMapAPI blueMapAPI, MarkerAPI markerAPI, Player player) {
+	public void addMarker(BlueMapAPI blueMapAPI, MarkerAPI markerAPI, OfflinePlayer player, Location location) {
 		MarkerSet markerSet;
 
 		if (markerAPI.getMarkerSet(markerSetId).isEmpty()) {
@@ -94,13 +107,13 @@ public final class main extends JavaPlugin implements Listener {
 			markerSet = markerAPI.getMarkerSet(markerSetId).get();
 		}
 
-		Optional<BlueMapWorld> blueMapWorld = blueMapAPI.getWorld(player.getLocation().getWorld().getUID()); //get the player's world
+		Optional<BlueMapWorld> blueMapWorld = blueMapAPI.getWorld(location.getWorld().getUID()); //get the player's world
 
 		if (blueMapWorld.isPresent()) //check if the world exists/is loaded
 		{
 			for (BlueMapMap map : blueMapWorld.get().getMaps()) { //then for every map of the world (worlds can have multiple maps)
 				POIMarker marker = markerSet.createPOIMarker(player.getUniqueId().toString(), map,
-						player.getLocation().getX(), player.getLocation().getY(), player.getLocation().getZ()); //make the marker
+						location.getX(), location.getY(), location.getZ()); //make the marker
 				marker.setLabel(player.getName());
 
 				BufferedImage image;
@@ -155,7 +168,7 @@ public final class main extends JavaPlugin implements Listener {
 		getLogger().info("Marker for " + player.getName() + " removed");
 	}
 
-	BufferedImage getBImgFromFile(Player player) {
+	BufferedImage getBImgFromFile(OfflinePlayer player) {
 		BufferedImage result;
 		File f = new File("bluemap/web/assets/playerheads/" + player.getUniqueId() + ".png"); //TODO: make this work for non-default webroots too
 		if(f.exists()) {
@@ -182,7 +195,7 @@ public final class main extends JavaPlugin implements Listener {
 		return result;
 	}
 
-	BufferedImage getBImgFromURL(Player player) {
+	BufferedImage getBImgFromURL(OfflinePlayer player) {
 		BufferedImage result;
 		try {
 			URL imageUrl = new URL("https://crafatar.com/avatars/" + player.getUniqueId() + ".png?size=8&overlay=true"); //TODO: get from config later on (see #8)
@@ -213,6 +226,15 @@ public final class main extends JavaPlugin implements Listener {
 
 		getServer().getPluginManager().registerEvents(this, this);
 		loadConfig();
+
+		PluginCommand offlineMarkers = Bukkit.getPluginCommand("offlinemarkers");
+		OfflineMarkers executor = new OfflineMarkers(this);
+		if (offlineMarkers != null) {
+			offlineMarkers.setExecutor(executor);
+			offlineMarkers.setTabCompleter(executor);
+		} else {
+			getLogger().warning("offlineMarkers is null. This is not good");
+		}
 
 		BlueMapAPI.onEnable(blueMapAPI -> {
 			getLogger().info("API ready!");
@@ -246,12 +268,10 @@ public final class main extends JavaPlugin implements Listener {
 			removeMarker(markerAPI, p);
 		}
 
-		try {
-			markerAPI.save();
-		} catch (IOException e) {
-			e.printStackTrace();
-		}
-	}
+    for (Player p : Bukkit.getOnlinePlayers()) {
+      addMarker(blueMapAPI, markerAPI, p, p.getLocation());
+    }
+  }
 
 	private void markAllOnlinePlayers(BlueMapAPI blueMapAPI) {
 		MarkerAPI markerAPI;
@@ -264,9 +284,83 @@ public final class main extends JavaPlugin implements Listener {
 		}
 
 		for (Player p : Bukkit.getOnlinePlayers()) {
-			addMarker(blueMapAPI, markerAPI, p);
+			addMarker(blueMapAPI, markerAPI, p, p.getLocation());
 		}
 
+		try {
+			markerAPI.save();
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
+	}
+
+	public void resetMarkers(){
+		//Clear the marker set (called by command or in preparation for loading markers from playerdata)
+		Optional<BlueMapAPI> oApi = BlueMapAPI.getInstance();
+		if(oApi.isEmpty()) return;
+		BlueMapAPI api = oApi.get();
+		try {
+			MarkerAPI markerAPI = api.getMarkerAPI();
+			markerAPI.removeMarkerSet(markerSetId);
+			MarkerSet emptySet = markerAPI.createMarkerSet(markerSetId);
+			emptySet.setLabel(markerSetName);
+			markerAPI.save();
+		}catch(IOException e){
+			e.printStackTrace();
+		}
+	}
+
+	public void loadMarkers(){
+
+		Optional<BlueMapAPI> oApi = BlueMapAPI.getInstance();
+		if(oApi.isEmpty()) return;
+		BlueMapAPI api = oApi.get();
+		MarkerAPI markerAPI;
+		try {
+			markerAPI = api.getMarkerAPI();
+		}catch (IOException e){
+			e.printStackTrace();
+			return;
+		}
+
+		//I really don't like "getWorlds().get(0)" as a way to get the main world, but as far as I can tell there is no other way
+		File playerDataFolder = new File(Bukkit.getWorlds().get(0).getWorldFolder(), "playerdata");
+		//Return if playerdata is missing for some reason.
+		if(!playerDataFolder.exists() || !playerDataFolder.isDirectory()) return;
+
+		for(OfflinePlayer op : Bukkit.getOfflinePlayers()){
+			//If player is online, ignore (I don't know why the method is called "getOfflinePlayers" when it also contains all online players...)
+			if(op.isOnline()) continue;
+
+			File dataFile = new File(playerDataFolder, op.getUniqueId() + ".dat");
+
+			//Failsafe if playerdata doesn't exist (should be impossible but whatever)
+			if(!dataFile.exists()) continue;
+
+			CompoundMap nbtData;
+			try(FileInputStream fis = new FileInputStream(dataFile);
+				NBTInputStream nbtInputStream = new NBTInputStream(fis)) {
+				nbtData = ((CompoundTag) nbtInputStream.readTag()).getValue();
+			} catch (IOException e) {
+				e.printStackTrace();
+				continue;
+			}
+
+			//Collect data
+			long worldUUIDLeast = (long) nbtData.get("WorldUUIDLeast").getValue();
+			long worldUUIDMost = (long) nbtData.get("WorldUUIDMost").getValue();
+			List<Double> position = ((List<DoubleTag>) nbtData.get("Pos").getValue()).stream().map(DoubleTag::getValue).collect(Collectors.toList());
+
+			//Convert to location
+			UUID worldUUID = new UUID(worldUUIDMost, worldUUIDLeast);
+			World w = Bukkit.getWorld(worldUUID);
+			//World doesn't exist or position is broken
+			if(w == null || position.size() != 3) continue;
+			Location loc = new Location(w, position.get(0), position.get(1), position.get(2));
+
+			//Add marker
+			addMarker(api, markerAPI, op, loc);
+		}
 		try {
 			markerAPI.save();
 		} catch (IOException e) {

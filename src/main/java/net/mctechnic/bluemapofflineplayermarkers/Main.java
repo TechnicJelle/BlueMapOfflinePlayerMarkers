@@ -39,7 +39,7 @@ import java.util.function.Consumer;
 
 import static org.bukkit.util.NumberConversions.round;
 
-public final class main extends JavaPlugin implements Listener {
+public final class Main extends JavaPlugin implements Listener {
 
 	private boolean useBlueMapSource = true;
 	private boolean verboseErrors = true;

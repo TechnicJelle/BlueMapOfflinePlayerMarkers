@@ -1,6 +1,6 @@
 package net.mctechnic.bluemapofflineplayermarkers.commands;
 
-import net.mctechnic.bluemapofflineplayermarkers.main;
+import net.mctechnic.bluemapofflineplayermarkers.Main;
 import org.bukkit.ChatColor;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandExecutor;
@@ -17,9 +17,9 @@ public class OfflineMarkers implements CommandExecutor, TabCompleter {
 	private static final String MARKERS_RESET = "All markers have been deleted";
 	private static final String MARKERS_LOADED = "Offline player markers have been loaded and created";
 
-	private main plugin;
+	private Main plugin;
 
-	public OfflineMarkers(main plugin){
+	public OfflineMarkers(Main plugin){
 		this.plugin = plugin;
 	}
 

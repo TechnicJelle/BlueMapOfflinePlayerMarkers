@@ -105,7 +105,7 @@ public class ImageUtils {
 	public static @Nullable BufferedImage GetBImgFromURL(@NotNull OfflinePlayer player) {
 		BufferedImage result;
 		try {
-			String url = Main.config.skinURL
+			String url = Main.config.skinURL.toString()
 					.replace("{UUID}", player.getUniqueId().toString())
 					.replace("{USERNAME}", player.getName())
 					.replace("{NAME}", player.getName());

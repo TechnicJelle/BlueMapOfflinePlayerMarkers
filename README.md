@@ -11,10 +11,9 @@ Compatible with Paper 1.13+, just like BlueMap itself.
 
 ## Commands
 
-| Command                 | Description                                                                                            |
-|-------------------------|--------------------------------------------------------------------------------------------------------|
-| `/offlinemarkers load`  | Loads player positions of all offline players from their playerdata nbt file and creates their markers |
-| `/offlinemarkers reset` | Clears the markerset                                                                                   |
+| Command                 | Description                                                                 |
+|-------------------------|-----------------------------------------------------------------------------|
+| `/offlinemarkers load`  | Makes markers for all offline players, loaded from the playerdata nbt files |
 
 **If you have worlds from multiple servers that you want to add the markers for, [@elsing](https://github.com/elsing) has made [a Skript that does just that](https://github.com/TechnicJelle/BlueMapOfflinePlayerMarkers/pull/16)**
 

@@ -1,9 +1,7 @@
 package com.technicjelle.bluemapofflineplayermarkers;
 
-import com.technicjelle.bluemapofflineplayermarkers.commands.OfflineMarkers;
 import de.bluecolored.bluemap.api.BlueMapAPI;
 import org.bukkit.Bukkit;
-import org.bukkit.command.PluginCommand;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 import org.bukkit.event.player.PlayerJoinEvent;
@@ -21,39 +19,36 @@ public final class Main extends JavaPlugin implements Listener {
 
 	@Override
 	public void onEnable() {
+		//all actual startup and shutdown logic moved to BlueMapAPI enable/disable methods, so `/bluemap reload` also reloads this plugin
+		BlueMapAPI.onEnable(onEnableListener);
+		BlueMapAPI.onDisable(onDisableListener);
+	}
+
+	Consumer<BlueMapAPI> onEnableListener = api -> {
 		logger = getLogger();
-		logger.info("BlueMap Offline Player Markers plugin enabled!");
+		logger.info("API Ready! BlueMap Offline Player Markers plugin enabled!");
 
 		getServer().getPluginManager().registerEvents(this, this);
 
 		config = new Config();
 
-		PluginCommand offlineMarkers = Bukkit.getPluginCommand("offlinemarkers");
-		OfflineMarkers executor = new OfflineMarkers(this);
-		if (offlineMarkers != null) {
-			offlineMarkers.setExecutor(executor);
-			offlineMarkers.setTabCompleter(executor);
-		} else {
-			getLogger().warning("offlineMarkers is null. This is not good");
-		}
-
 		markers = new MarkerHandler();
 
-		BlueMapAPI.onEnable(onEnableListener);
+		Bukkit.getScheduler().runTaskAsynchronously(this, () -> {
+			markers.attachToBlueMap(api);
+			markers.loadOfflineMarkers();
+		});
+	};
 
-		//TODO: Load persistent markers from JSON
-	}
-
-	Consumer<BlueMapAPI> onEnableListener = api -> {
-		getLogger().info("API ready!");
-		markers.attachToBlueMap(api);
+	Consumer<BlueMapAPI> onDisableListener = api -> {
+		getLogger().info("API disabled! BlueMap Offline Player Markers shutting down...");
+		//not much to do here, actually...
 	};
 
 	@Override
 	public void onDisable() {
-		//TODO: Save persistent markers to JSON
-
 		BlueMapAPI.unregisterListener(onEnableListener);
+		BlueMapAPI.unregisterListener(onDisableListener);
 		getLogger().info("BlueMap Offline Player Markers plugin disabled!");
 	}
 

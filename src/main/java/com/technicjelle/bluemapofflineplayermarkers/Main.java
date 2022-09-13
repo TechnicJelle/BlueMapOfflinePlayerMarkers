@@ -1,6 +1,7 @@
 package com.technicjelle.bluemapofflineplayermarkers;
 
 import de.bluecolored.bluemap.api.BlueMapAPI;
+import org.bstats.bukkit.Metrics;
 import org.bukkit.Bukkit;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
@@ -19,6 +20,8 @@ public final class Main extends JavaPlugin implements Listener {
 
 	@Override
 	public void onEnable() {
+		Metrics metrics = new Metrics(this, 16425);
+
 		//all actual startup and shutdown logic moved to BlueMapAPI enable/disable methods, so `/bluemap reload` also reloads this plugin
 		BlueMapAPI.onEnable(onEnableListener);
 		BlueMapAPI.onDisable(onDisableListener);

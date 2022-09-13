@@ -1,6 +1,7 @@
 # BlueMap Offline Player Markers
 
 [![GitHub Total Downloads](https://img.shields.io/github/downloads/TechnicJelle/BlueMapOfflinePlayerMarkers/total?label=Downloads&color=success "Click here to download the plugin")](https://github.com/TechnicJelle/BlueMapOfflinePlayerMarkers/releases/latest)
+[![Servers using this plugin](https://img.shields.io/bstats/servers/16425?label=Servers)](https://bstats.org/plugin/bukkit/BlueMap%20Offline%20Player%20Markers/16425)
 
 Adds markers in the positions where players have logged off to [BlueMap](https://github.com/BlueMap-Minecraft/BlueMap).
 

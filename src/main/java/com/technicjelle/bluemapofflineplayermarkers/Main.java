@@ -9,6 +9,10 @@ import org.bukkit.event.player.PlayerJoinEvent;
 import org.bukkit.event.player.PlayerQuitEvent;
 import org.bukkit.plugin.java.JavaPlugin;
 
+import java.io.File;
+import java.io.IOException;
+import java.io.InputStream;
+import java.nio.file.Files;
 import java.util.function.Consumer;
 import java.util.logging.Logger;
 
@@ -22,6 +26,16 @@ public final class Main extends JavaPlugin implements Listener {
 	public void onEnable() {
 		Metrics metrics = new Metrics(this, 16425);
 
+		getDataFolder().mkdirs();
+		File configFile = new File(getDataFolder(), "config.yml");
+		if (!configFile.exists()) {
+			try (InputStream inputStream = Main.class.getClassLoader().getResourceAsStream("config.yml")) {
+				Files.copy(inputStream, configFile.toPath());
+			} catch (IOException e) {
+				e.printStackTrace();
+			}
+		}
+
 		//all actual startup and shutdown logic moved to BlueMapAPI enable/disable methods, so `/bluemap reload` also reloads this plugin
 		BlueMapAPI.onEnable(onEnableListener);
 		BlueMapAPI.onDisable(onDisableListener);
@@ -33,7 +47,7 @@ public final class Main extends JavaPlugin implements Listener {
 
 		getServer().getPluginManager().registerEvents(this, this);
 
-		config = new Config();
+		config = new Config(this);
 
 		markers = new MarkerHandler();
 

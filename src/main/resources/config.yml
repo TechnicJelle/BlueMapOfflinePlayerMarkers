@@ -3,7 +3,8 @@ MarkerSetName: "Offline Players"
 #Whether to use BlueMap's own player icons, instead of downloading manually
 UseBlueMapSource: true
 
-#The place to get the playerhead icons from. Leave empty to use BlueMap's own files
+#The place to get the playerhead icons from.
+#Only effective if UseBlueMapSource is set to false
 #Accepted variables: {UUID}, {USERNAME}
 # Examples:
 #  SkinURL: ""

@@ -11,7 +11,6 @@ import org.bukkit.plugin.java.JavaPlugin;
 
 import java.io.File;
 import java.io.IOException;
-import java.io.InputStream;
 import java.nio.file.Files;
 import java.util.function.Consumer;
 import java.util.logging.Logger;
@@ -29,8 +28,8 @@ public final class Main extends JavaPlugin implements Listener {
 		getDataFolder().mkdirs();
 		File configFile = new File(getDataFolder(), "config.yml");
 		if (!configFile.exists()) {
-			try (InputStream inputStream = Main.class.getClassLoader().getResourceAsStream("config.yml")) {
-				Files.copy(inputStream, configFile.toPath());
+			try {
+				Files.copy(getResource("config.yml"), configFile.toPath());
 			} catch (IOException e) {
 				e.printStackTrace();
 			}

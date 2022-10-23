@@ -5,9 +5,10 @@ import java.net.URL;
 
 public class Config {
 
+	public static final String MARKER_SET_ID = "offplrs";
+
 	private final Main plugin;
 
-	public String markerSetId;
 	public String markerSetName;
 	public boolean useBlueMapSource;
 	public URL skinURL;
@@ -20,7 +21,6 @@ public class Config {
 	}
 
 	private void loadConfig() {
-		markerSetId = plugin.getConfig().getString("MarkerSetId");
 		markerSetName = plugin.getConfig().getString("MarkerSetName");
 		useBlueMapSource = plugin.getConfig().getBoolean("UseBlueMapSource");
 

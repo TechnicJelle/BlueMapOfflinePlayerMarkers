@@ -4,28 +4,34 @@ import java.net.MalformedURLException;
 import java.net.URL;
 
 public class Config {
-	public final String markerSetId = "offplrs";
+
+	public static final String MARKER_SET_ID = "offplrs";
+
+	private final Main plugin;
+
 	public String markerSetName;
 	public boolean useBlueMapSource;
 	public URL skinURL;
 	public boolean verboseErrors;
 
-	public Config() {
+	public Config(Main plugin) {
+		this.plugin = plugin;
+		plugin.reloadConfig();
 		loadConfig();
 	}
 
 	private void loadConfig() {
-		markerSetName = "Offline Players"; //TODO: https://github.com/TechnicJelle/BlueMapOfflinePlayerMarkers/issues/10
-		useBlueMapSource = true;
+		markerSetName = plugin.getConfig().getString("MarkerSetName");
+		useBlueMapSource = plugin.getConfig().getBoolean("UseBlueMapSource");
 
 		try {
 			//Check if the skinURL is a valid URL
-			skinURL = new URL("https://crafatar.com/avatars/{UUID}.png?size=8&overlay=true"); //TODO: https://github.com/TechnicJelle/BlueMapOfflinePlayerMarkers/issues/8
+			skinURL = new URL(plugin.getConfig().getString("SkinURL"));
 		} catch (MalformedURLException e) {
 			Main.logger.warning("Invalid skin URL: " + skinURL);
 			e.printStackTrace();
 		}
 
-		verboseErrors = true; //TODO: https://github.com/TechnicJelle/BlueMapOfflinePlayerMarkers/issues/13
+		verboseErrors = plugin.getConfig().getBoolean("VerboseErrors");
 	}
 }

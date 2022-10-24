@@ -68,7 +68,7 @@ public class MarkerHandler {
 			//add that markerset to each bluemap map of every world
 			api.getWorld(worldUID).ifPresent(bmWorld -> {
 				for (BlueMapMap map : bmWorld.getMaps()) {
-					map.getMarkerSets().put(Main.config.markerSetId, markerSets.get(worldUID));
+					map.getMarkerSets().put(Config.MARKER_SET_ID, markerSets.get(worldUID));
 				}
 			});
 		}

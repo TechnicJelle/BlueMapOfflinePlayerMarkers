@@ -1,14 +1,15 @@
 MarkerSetName: "Offline Players"
 
-#Whether to use BlueMap's own player icons, instead of downloading manually
+# Whether to use BlueMap's own player icons, instead of downloading
+#  externally from the SkinURL defined below
 UseBlueMapSource: true
 
-#The place to get the playerhead icons from.
-#Only effective if UseBlueMapSource is set to false
-#Accepted variables: {UUID}, {USERNAME}
-# Examples:
-#  SkinURL: ""
-#  SkinURL: "https://crafatar.com/avatars/{UUID}.png?size=8&overlay=true"
+# The place to get the playerhead icons from.
+# Only effective if UseBlueMapSource is set to false
+# Accepted variables: {UUID}, {USERNAME}
+#  Examples:
+#   SkinURL: ""
+#   SkinURL: "https://crafatar.com/avatars/{UUID}.png?size=8&overlay=true"
 SkinURL: "https://crafatar.com/avatars/{UUID}.png?size=8&overlay=true"
 
 VerboseErrors: false

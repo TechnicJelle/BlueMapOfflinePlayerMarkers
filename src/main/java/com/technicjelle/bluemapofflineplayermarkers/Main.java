@@ -23,9 +23,9 @@ public final class Main extends JavaPlugin implements Listener {
 
 	@Override
 	public void onEnable() {
-		Metrics metrics = new Metrics(this, 16425);
+		new Metrics(this, 16425);
 
-		getDataFolder().mkdirs();
+		if(getDataFolder().mkdirs()) getLogger().info("Created plugin config directory");
 		File configFile = new File(getDataFolder(), "config.yml");
 		if (!configFile.exists()) {
 			try {

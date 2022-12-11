@@ -23,8 +23,8 @@ To get support with this plugin, join the [BlueMap Discord server](https://bluec
 
 ## Special thanks to
 
-[Seercat3160](https://github.com/Seercat3160), [Mark-255](https://github.com/Mark-225)
-and [elsing](https://github.com/elsing) for their contributions to the project!
+[Seercat3160](https://github.com/Seercat3160), [Mark-255](https://github.com/Mark-225),
+[elsing](https://github.com/elsing) and [LOOHP](https://github.com/LOOHP) for their contributions to the project!
 
 [pop4959](https://github.com/pop4959/BlueMap-Essentials) and [JotaFaD](https://github.com/JotaFaD/CivsExtras) for their
 open-source plugins that gave me great examples to learn from.\

@@ -1,6 +1,8 @@
 package com.technicjelle.bluemapofflineplayermarkers;
 
+import de.bluecolored.bluemap.api.AssetStorage;
 import de.bluecolored.bluemap.api.BlueMapAPI;
+import de.bluecolored.bluemap.api.BlueMapMap;
 import org.bukkit.OfflinePlayer;
 import org.bukkit.util.NumberConversions;
 import org.jetbrains.annotations.NotNull;
@@ -14,6 +16,9 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.net.MalformedURLException;
 import java.net.URL;
+import java.util.Objects;
+import java.util.Optional;
+import java.util.logging.Level;
 
 public class ImageUtils {
 
@@ -64,34 +69,22 @@ public class ImageUtils {
 	 * Gets the player image that BlueMap itself is using.
 	 *
 	 * @param player The player to get the image of.
-	 * @param api    The BlueMapAPI to use.
+	 * @param assetStorage The AssetStorage to load the image from.
 	 * @return The image of the player or {@code null} if an error occurred.
 	 */
-	public static @Nullable BufferedImage GetBImgFromAPI(@NotNull OfflinePlayer player, @NotNull BlueMapAPI api) {
-		BufferedImage result;
-		File f = new File(api.getWebApp().getWebRoot() + "/assets/playerheads/" + player.getUniqueId() + ".png");
-		if (f.exists()) {
-			try {
-				result = ImageIO.read(f);
-			} catch (IOException e) {
-				e.printStackTrace();
-				return null;
+	public static @Nullable BufferedImage GetBImgFromAPI(@NotNull OfflinePlayer player, @NotNull AssetStorage assetStorage) {
+		try {
+			Optional<InputStream> optIn = assetStorage.readAsset("playerheads/" + player.getUniqueId() + ".png");
+			if (optIn.isPresent()) {
+				try (InputStream in = optIn.get()) {
+					return ImageIO.read(in);
+				}
 			}
-		} else {
-			Main.logger.warning("Marker for " + player.getName() + " couldn't be added!" + (Main.config.verboseErrors ? "" : " (config: verboseErrors)"));
-			if (Main.config.verboseErrors) {
-				Main.logger.warning(" Couldn't find the playerhead image file in BlueMap's resources");
-				Main.logger.warning(" This is likely due to the fact that BlueMap was installed after they last logged off");
-				Main.logger.warning(" Falling back to a Steve skin...");
-			}
-			try {
-				result = ImageIO.read(new File(api.getWebApp().getWebRoot() + "/assets/steve.png"));
-			} catch (IOException e) {
-				e.printStackTrace();
-				return null;
-			}
+		} catch (IOException ex) {
+			Main.logger.log(Level.SEVERE, "Failed to load playerhead image from BlueMaps AssetStorage!", ex);
 		}
-		return result;
+
+		return null;
 	}
 
 	/**

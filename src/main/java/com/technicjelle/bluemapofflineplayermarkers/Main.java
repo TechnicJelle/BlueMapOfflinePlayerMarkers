@@ -8,17 +8,22 @@ import org.bukkit.event.Listener;
 import org.bukkit.event.player.PlayerJoinEvent;
 import org.bukkit.event.player.PlayerQuitEvent;
 import org.bukkit.plugin.java.JavaPlugin;
+import org.jetbrains.annotations.Nullable;
 
+import javax.imageio.ImageIO;
+import java.awt.image.BufferedImage;
 import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.util.function.Consumer;
+import java.util.logging.Level;
 import java.util.logging.Logger;
 
 public final class Main extends JavaPlugin implements Listener {
 	public static Logger logger;
 	public static Config config;
 
+	@Nullable
 	public MarkerHandler markers;
 
 	@Override
@@ -48,11 +53,16 @@ public final class Main extends JavaPlugin implements Listener {
 
 		config = new Config(this);
 
-		markers = new MarkerHandler();
-
 		Bukkit.getScheduler().runTaskAsynchronously(this, () -> {
-			markers.attachToBlueMap(api);
-			markers.loadOfflineMarkers();
+			try {
+				// load steve
+				BufferedImage steve = ImageIO.read(new File(api.getWebApp().getWebRoot() + "/assets/steve.png"));
+
+				markers = new MarkerHandler(steve);
+				markers.loadOfflineMarkers();
+			} catch (IOException ex) {
+				Main.logger.log(Level.SEVERE, "Failed to load steve from BlueMap's webroot!", ex);
+			}
 		});
 	};
 
@@ -71,15 +81,15 @@ public final class Main extends JavaPlugin implements Listener {
 
 	@EventHandler
 	public void onJoin(PlayerJoinEvent e) {
-		Bukkit.getScheduler().runTaskAsynchronously(this, () ->
-				markers.remove(e.getPlayer())
-		);
+		Bukkit.getScheduler().runTaskAsynchronously(this, () -> {
+			if (markers != null) markers.remove(e.getPlayer());
+		});
 	}
 
 	@EventHandler
 	public void onLeave(PlayerQuitEvent e) {
-		Bukkit.getScheduler().runTaskAsynchronously(this, () ->
-				markers.add(e.getPlayer())
-		);
+		Bukkit.getScheduler().runTaskAsynchronously(this, () -> {
+			if (markers != null) markers.add(e.getPlayer());
+		});
 	}
 }

@@ -67,9 +67,12 @@ public class MarkerHandler {
 		if (blueMapWorld == null) return;
 
 		// Create marker-template
+		// (add 1.8 to y to place the marker at the head-position of the player, like bluemap does with it's player-markers)
 		POIMarker.Builder markerBuilder = POIMarker.builder()
 				.label(player.getName())
-				.position(location.getX(), location.getY(), location.getZ());
+				.detail(player.getName() + " <i>(offline)</i>")
+				.styleClasses("bmopm-offline-player")
+				.position(location.getX(), location.getY() + 1.8, location.getZ());
 
 		// Create an icon and marker for each map of this world
 		// We need to create a separate marker per map, because the map-storage that the icon is saved in
@@ -101,8 +104,8 @@ public class MarkerHandler {
 			}
 
 			// process image
-			ImageUtils.Recolour(image);
-			image = ImageUtils.Resize(image, 32, 32);
+			//ImageUtils.Recolour(image);
+			//image = ImageUtils.Resize(image, 32, 32); // moved to css
 
 			// write image to asset storage
 			String assetName = "offlineplayerheads/" + player.getUniqueId() + ".png";
@@ -115,7 +118,7 @@ public class MarkerHandler {
 
 			// set marker-icon
 			String imagePath = map.getAssetStorage().getAssetUrl(assetName);
-			markerBuilder.icon(imagePath, image.getWidth() / 2, image.getHeight() / 2);
+			markerBuilder.icon(imagePath, 0, 0);
 
 			// get marker-set (or create new marker set if none found)
 			MarkerSet markerSet = map.getMarkerSets().computeIfAbsent(Config.MARKER_SET_ID, id -> MarkerSet.builder()
@@ -140,7 +143,8 @@ public class MarkerHandler {
 		BlueMapAPI.getInstance().ifPresent(api -> {
 			// remove all markers with the players uuid
 			for (BlueMapMap map : api.getMaps()) {
-				map.getMarkerSets().get(Config.MARKER_SET_ID).remove(player.getUniqueId().toString());
+				MarkerSet set = map.getMarkerSets().get(Config.MARKER_SET_ID);
+				if (set != null) set.remove(player.getUniqueId().toString());
 			}
 
 			Main.logger.info("Marker for " + player.getName() + " removed");

@@ -31,15 +31,15 @@ public class ImageUtils {
 		for (int y = 0; y < image.getHeight(); y++) {
 			for (int x = 0; x < image.getWidth(); x++) {
 				int rgb = image.getRGB(x, y);
-				int red = (rgb >> 16) & 0x0ff;
-				int green = (rgb >> 8) & 0x0ff;
-				int blue = (rgb) & 0x0ff;
+				int alpha = (rgb >> 24) & 0xff;
+				int red = (rgb >> 16) & 0xff;
+				int green = (rgb >> 8) & 0xff;
+				int blue = (rgb) & 0xff;
 
 				//https://tannerhelland.com/2011/10/01/grayscale-image-algorithm-vb6.html
 //				int grey = (red + green + blue) / 3; //average
 				int grey = NumberConversions.round(red * 0.3 + green * 0.59 + blue * 0.11); //luma
-				Color c = new Color(grey, grey, grey);
-				image.setRGB(x, y, c.getRGB());
+				image.setRGB(x, y, alpha << 24 | grey << 16 | grey << 8 | grey);
 			}
 		}
 	}

@@ -14,7 +14,11 @@ import javax.imageio.ImageIO;
 import java.awt.image.BufferedImage;
 import java.io.File;
 import java.io.IOException;
+import java.io.InputStream;
+import java.io.OutputStream;
 import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.StandardOpenOption;
 import java.util.function.Consumer;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -53,15 +57,42 @@ public final class Main extends JavaPlugin implements Listener {
 
 		config = new Config(this);
 
+		// "registerStyle" has to be invoked inside the consumer (=> not in the async scheduled task below)
+		api.getWebApp().registerStyle("css/bmopm.css");
+		api.getWebApp().registerScript("js/bmopm.js");
+
+		Path webroot = api.getWebApp().getWebRoot();
 		Bukkit.getScheduler().runTaskAsynchronously(this, () -> {
 			try {
 				// load steve
-				BufferedImage steve = ImageIO.read(new File(api.getWebApp().getWebRoot() + "/assets/steve.png"));
+				BufferedImage steve = ImageIO.read(new File(webroot + "/assets/steve.png"));
 
 				markers = new MarkerHandler(steve);
 				markers.loadOfflineMarkers();
 			} catch (IOException ex) {
 				Main.logger.log(Level.SEVERE, "Failed to load steve from BlueMap's webroot!", ex);
+			}
+
+			// update custom style
+			Path stylePath = webroot.resolve("css").resolve("bmopm.css");
+			try (
+					InputStream in = getResource("style.css");
+					OutputStream out = Files.newOutputStream(stylePath, StandardOpenOption.CREATE, StandardOpenOption.TRUNCATE_EXISTING)
+			){
+				in.transferTo(out);
+			} catch (IOException ex) {
+				Main.logger.log(Level.SEVERE, "Failed to update bmopm.css in BlueMap's webroot!", ex);
+			}
+
+			// update custom script
+			Path scriptPath = webroot.resolve("js").resolve("bmopm.js");
+			try (
+					InputStream in = getResource("script.js");
+					OutputStream out = Files.newOutputStream(scriptPath, StandardOpenOption.CREATE, StandardOpenOption.TRUNCATE_EXISTING)
+			){
+				in.transferTo(out);
+			} catch (IOException ex) {
+				Main.logger.log(Level.SEVERE, "Failed to update bmopm.js in BlueMap's webroot!", ex);
 			}
 		});
 	};

@@ -58,8 +58,8 @@ public final class Main extends JavaPlugin implements Listener {
 		config = new Config(this);
 
 		// "registerStyle" has to be invoked inside the consumer (=> not in the async scheduled task below)
-		api.getWebApp().registerStyle("css/bmopm.css");
-		api.getWebApp().registerScript("js/bmopm.js");
+		api.getWebApp().registerStyle("assets/bmopm.css");
+		api.getWebApp().registerScript("assets/bmopm.js");
 
 		Path webroot = api.getWebApp().getWebRoot();
 		Bukkit.getScheduler().runTaskAsynchronously(this, () -> {
@@ -74,7 +74,7 @@ public final class Main extends JavaPlugin implements Listener {
 			}
 
 			// update custom style
-			Path stylePath = webroot.resolve("css").resolve("bmopm.css");
+			Path stylePath = webroot.resolve("assets").resolve("bmopm.css");
 			try (
 					InputStream in = getResource("style.css");
 					OutputStream out = Files.newOutputStream(stylePath, StandardOpenOption.CREATE, StandardOpenOption.TRUNCATE_EXISTING)
@@ -85,7 +85,7 @@ public final class Main extends JavaPlugin implements Listener {
 			}
 
 			// update custom script
-			Path scriptPath = webroot.resolve("js").resolve("bmopm.js");
+			Path scriptPath = webroot.resolve("assets").resolve("bmopm.js");
 			try (
 					InputStream in = getResource("script.js");
 					OutputStream out = Files.newOutputStream(scriptPath, StandardOpenOption.CREATE, StandardOpenOption.TRUNCATE_EXISTING)

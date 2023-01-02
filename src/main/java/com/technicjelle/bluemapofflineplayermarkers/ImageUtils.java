@@ -15,6 +15,9 @@ import java.io.InputStream;
 import java.net.MalformedURLException;
 import java.net.URL;
 
+import static com.technicjelle.bluemapofflineplayermarkers.Main.config;
+import static com.technicjelle.bluemapofflineplayermarkers.Main.logger;
+
 public class ImageUtils {
 
 	/**
@@ -78,11 +81,11 @@ public class ImageUtils {
 				return null;
 			}
 		} else {
-			Main.logger.warning("Marker for " + player.getName() + " couldn't be added!" + (Main.config.verboseErrors ? "" : " (config: verboseErrors)"));
-			if (Main.config.verboseErrors) {
-				Main.logger.warning(" Couldn't find the playerhead image file in BlueMap's resources");
-				Main.logger.warning(" This is likely due to the fact that BlueMap was installed after they last logged off");
-				Main.logger.warning(" Falling back to a Steve skin...");
+			logger.warning("Marker for " + player.getName() + " couldn't be added!" + (config.verboseErrors ? "" : " (config: verboseErrors)"));
+			if (config.verboseErrors) {
+				logger.warning(" Couldn't find the playerhead image file in BlueMap's resources");
+				logger.warning(" This is likely due to the fact that BlueMap was installed after they last logged off");
+				logger.warning(" Falling back to a Steve skin...");
 			}
 			try {
 				result = ImageIO.read(new File(api.getWebApp().getWebRoot() + "/assets/steve.png"));
@@ -105,7 +108,7 @@ public class ImageUtils {
 	public static @Nullable BufferedImage GetBImgFromURL(@NotNull OfflinePlayer player) {
 		BufferedImage result;
 		try {
-			String url = Main.config.skinURL.toString()
+			String url = config.skinURL.toString()
 					.replace("{UUID}", player.getUniqueId().toString())
 					.replace("{USERNAME}", player.getName())
 					.replace("{NAME}", player.getName());

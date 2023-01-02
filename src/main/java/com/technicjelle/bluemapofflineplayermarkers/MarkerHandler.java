@@ -22,6 +22,9 @@ import java.io.IOException;
 import java.util.*;
 import java.util.stream.Collectors;
 
+import static com.technicjelle.bluemapofflineplayermarkers.Main.config;
+import static com.technicjelle.bluemapofflineplayermarkers.Main.logger;
+
 
 public class MarkerHandler {
 
@@ -47,7 +50,7 @@ public class MarkerHandler {
 			//check that this world doesn't already have a markerset
 			if (!markerSets.containsKey(world.getUID())) {
 				//make a new markerset
-				MarkerSet markerSet = new MarkerSet(Main.config.markerSetName);
+				MarkerSet markerSet = new MarkerSet(config.markerSetName);
 				markerSet.setDefaultHidden(false);
 				markerSet.setToggleable(true);
 
@@ -92,7 +95,7 @@ public class MarkerHandler {
 	public void add(OfflinePlayer player, Location location) {
 		Optional<BlueMapAPI> optionalApi = BlueMapAPI.getInstance();
 		if (optionalApi.isEmpty()) {
-			Main.logger.warning("Tried to add a marker, but BlueMap wasn't loaded!");
+			logger.warning("Tried to add a marker, but BlueMap wasn't loaded!");
 			return;
 		}
 		BlueMapAPI api = optionalApi.get();
@@ -100,7 +103,7 @@ public class MarkerHandler {
 		POIMarker marker = new POIMarker(player.getName(), new Vector3d(location.getX(), location.getY(), location.getZ()));
 
 		BufferedImage image;
-		if (Main.config.useBlueMapSource) {
+		if (config.useBlueMapSource) {
 			image = ImageUtils.GetBImgFromAPI(player, api);
 		} else {
 			image = ImageUtils.GetBImgFromURL(player);
@@ -120,7 +123,7 @@ public class MarkerHandler {
 
 		markerSets.get(location.getWorld().getUID()).getMarkers().put(player.getUniqueId().toString(), marker);
 
-		Main.logger.info("Marker for " + player.getName() + " added");
+		logger.info("Marker for " + player.getName() + " added");
 	}
 
 	/**
@@ -132,12 +135,12 @@ public class MarkerHandler {
 		World world = player.getWorld();
 		MarkerSet markerSet = markerSets.get(world.getUID());
 		if (markerSet == null) {
-			Main.logger.warning("Tried to remove a marker, but there is no marker set for the world " + world.getName());
+			logger.warning("Tried to remove a marker, but there is no marker set for the world " + world.getName());
 			return;
 		}
 		markerSet.getMarkers().remove(player.getUniqueId().toString());
 
-		Main.logger.info("Marker for " + player.getName() + " removed");
+		logger.info("Marker for " + player.getName() + " removed");
 	}
 
 	/**

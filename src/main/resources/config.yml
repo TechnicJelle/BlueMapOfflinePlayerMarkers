@@ -1,8 +1,8 @@
 # Marker Set Options
 # Documentation: https://bluemap.bluecolored.de/wiki/customization/Markers.html#marker-sets
 MarkerSetName: "Offline Players"
-DefaultHidden: false
 Toggleable: true
+DefaultHidden: false
 
 # By default, this plugin will show everyone who has ever joined the server.
 # If you want to show only players who have joined in the last X hours, set this to a number greater than 0.

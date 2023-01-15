@@ -98,8 +98,8 @@ public class MarkerHandler {
 			// get marker-set (or create new marker set if none found)
 			MarkerSet markerSet = map.getMarkerSets().computeIfAbsent(Config.MARKER_SET_ID, id -> MarkerSet.builder()
 					.label(config.markerSetName)
-					.defaultHidden(config.defaultHidden)
 					.toggleable(config.toggleable)
+					.defaultHidden(config.defaultHidden)
 					.build());
 
 			// add marker

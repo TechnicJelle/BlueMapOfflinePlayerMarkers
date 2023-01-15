@@ -1,32 +1,37 @@
 
 .bmopm-offline-player {
-    filter: grayscale(1);
+	filter: grayscale(1);
+
+    /* Pixel Scaling filter, just in case*/
+    -ms-interpolation-mode: nearest-neighbor; /* IE, only works on <img> tags */
+    image-rendering: crisp-edges; /* Firefox */
+    image-rendering: pixelated; /* Chromium + Safari */
 }
 
 .bmopm-offline-player > .bm-marker-poi-icon {
-    width: 32px;
-    height: 32px;
+	width: 32px;
+	height: 32px;
 
-    /* can't use transform here because the poi-icon overwrites it already */
-    position: relative;
-    top: -16px;
-    left: -16px;
+	/* can't use transform here because the poi-icon overwrites it already */
+	position: relative;
+	top: -16px;
+	left: -16px;
 
-    transition: width 0.3s, height 0.3s, top 0.3s, left 0.3s, opacity 0.3s !important;
+	transition: width 0.3s, height 0.3s, top 0.3s, left 0.3s, opacity 0.3s !important;
 }
 
 .bmopm-offline-player > .bm-marker-poi-icon.bmopm-small {
-    width: 16px;
-    height: 16px;
+	width: 16px;
+	height: 16px;
 
-    top: -8px;
-    left: -8px;
+	top: -8px;
+	left: -8px;
 }
 
 .bmopm-offline-player > .bm-marker-poi-label {
-    white-space: nowrap;
+	white-space: nowrap;
 }
 
 .bmopm-offline-player > .bm-marker-poi-label > i {
-    color: var(--theme-fg-light);
+	color: var(--theme-fg-light);
 }

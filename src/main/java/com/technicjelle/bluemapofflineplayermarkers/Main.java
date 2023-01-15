@@ -8,11 +8,7 @@ import org.bukkit.event.Listener;
 import org.bukkit.event.player.PlayerJoinEvent;
 import org.bukkit.event.player.PlayerQuitEvent;
 import org.bukkit.plugin.java.JavaPlugin;
-import org.jetbrains.annotations.Nullable;
 
-import javax.imageio.ImageIO;
-import java.awt.image.BufferedImage;
-import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
@@ -26,9 +22,6 @@ import java.util.logging.Logger;
 public final class Main extends JavaPlugin implements Listener {
 	public static Logger logger;
 	public static Config config;
-
-	@Nullable
-	public MarkerHandler markers;
 
 	@Override
 	public void onEnable() {
@@ -48,45 +41,30 @@ public final class Main extends JavaPlugin implements Listener {
 
 		config = new Config(this);
 
+		Path webroot = api.getWebApp().getWebRoot();
+
 		// "registerStyle" has to be invoked inside the consumer (=> not in the async scheduled task below)
+		copyResourceToBlueMapWebApp(webroot, "style.css", "bmopm.css");
 		api.getWebApp().registerStyle("assets/bmopm.css");
+
+		copyResourceToBlueMapWebApp(webroot, "script.js", "bmopm.js");
 		api.getWebApp().registerScript("assets/bmopm.js");
 
-		Path webroot = api.getWebApp().getWebRoot();
-		Bukkit.getScheduler().runTaskAsynchronously(this, () -> {
-			try {
-				// load steve
-				BufferedImage steve = ImageIO.read(new File(webroot + "/assets/steve.png"));
-
-				markers = new MarkerHandler(steve);
-				markers.loadOfflineMarkers();
-			} catch (IOException ex) {
-				Main.logger.log(Level.SEVERE, "Failed to load steve from BlueMap's webroot!", ex);
-			}
-
-			// update custom style
-			Path stylePath = webroot.resolve("assets").resolve("bmopm.css");
-			try (
-					InputStream in = getResource("style.css");
-					OutputStream out = Files.newOutputStream(stylePath, StandardOpenOption.CREATE, StandardOpenOption.TRUNCATE_EXISTING)
-			){
-				in.transferTo(out);
-			} catch (IOException ex) {
-				Main.logger.log(Level.SEVERE, "Failed to update bmopm.css in BlueMap's webroot!", ex);
-			}
-
-			// update custom script
-			Path scriptPath = webroot.resolve("assets").resolve("bmopm.js");
-			try (
-					InputStream in = getResource("script.js");
-					OutputStream out = Files.newOutputStream(scriptPath, StandardOpenOption.CREATE, StandardOpenOption.TRUNCATE_EXISTING)
-			){
-				in.transferTo(out);
-			} catch (IOException ex) {
-				Main.logger.log(Level.SEVERE, "Failed to update bmopm.js in BlueMap's webroot!", ex);
-			}
-		});
+		//create marker handler and add all offline players in a separate thread, so the server doesn't hang up while it's going
+		Bukkit.getScheduler().runTaskAsynchronously(this, MarkerHandler::loadOfflineMarkers);
 	};
+
+	private void copyResourceToBlueMapWebApp(Path webroot, String fromResource, String toAsset) {
+		Path toPath = webroot.resolve("assets").resolve(toAsset);
+		try (
+				InputStream in = getResource(fromResource);
+				OutputStream out = Files.newOutputStream(toPath, StandardOpenOption.CREATE, StandardOpenOption.TRUNCATE_EXISTING)
+		){
+			in.transferTo(out);
+		} catch (IOException ex) {
+			logger.log(Level.SEVERE, "Failed to update " + toAsset + " in BlueMap's webroot!", ex);
+		}
+	}
 
 	Consumer<BlueMapAPI> onDisableListener = api -> {
 		logger.info("API disabled! BlueMap Offline Player Markers shutting down...");
@@ -103,15 +81,11 @@ public final class Main extends JavaPlugin implements Listener {
 
 	@EventHandler
 	public void onJoin(PlayerJoinEvent e) {
-		Bukkit.getScheduler().runTaskAsynchronously(this, () -> {
-			if (markers != null) markers.remove(e.getPlayer());
-		});
+		Bukkit.getScheduler().runTaskAsynchronously(this, () -> MarkerHandler.remove(e.getPlayer()));
 	}
 
 	@EventHandler
 	public void onLeave(PlayerQuitEvent e) {
-		Bukkit.getScheduler().runTaskAsynchronously(this, () -> {
-			if (markers != null) markers.add(e.getPlayer());
-		});
+		Bukkit.getScheduler().runTaskAsynchronously(this, () -> MarkerHandler.add(e.getPlayer()));
 	}
 }

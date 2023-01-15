@@ -15,39 +15,26 @@ import org.bukkit.OfflinePlayer;
 import org.bukkit.World;
 import org.bukkit.entity.Player;
 
-import javax.imageio.ImageIO;
-import java.awt.image.BufferedImage;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
-import java.io.OutputStream;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 import java.util.logging.Level;
 import java.util.stream.Collectors;
 
-import static com.technicjelle.bluemapofflineplayermarkers.Main.config;
 import static com.technicjelle.bluemapofflineplayermarkers.Main.logger;
 
 
 public class MarkerHandler {
-
-	private final BufferedImage fallbackIcon;
-
-	/**
-	 * Creates a new MarkerHandler.
-	 */
-	public MarkerHandler(BufferedImage fallbackIcon) {
-		this.fallbackIcon = fallbackIcon;
-	}
 
 	/**
 	 * Adds a player marker to the map.
 	 *
 	 * @param player The player to add the marker for.
 	 */
-	public void add(Player player) {
+	public static void add(Player player) {
 		add(player, player.getLocation());
 	}
 
@@ -57,7 +44,7 @@ public class MarkerHandler {
 	 * @param player   The player to add the marker for.
 	 * @param location The location to put the marker at.
 	 */
-	public void add(OfflinePlayer player, Location location) {
+	public static void add(OfflinePlayer player, Location location) {
 		Optional<BlueMapAPI> optionalApi = BlueMapAPI.getInstance();
 		if (optionalApi.isEmpty()) {
 			logger.warning("Tried to add a marker, but BlueMap wasn't loaded!");
@@ -70,7 +57,7 @@ public class MarkerHandler {
 		if (blueMapWorld == null) return;
 
 		// Create marker-template
-		// (add 1.8 to y to place the marker at the head-position of the player, like bluemap does with it's player-markers)
+		// (add 1.8 to y to place the marker at the head-position of the player, like BlueMap does with its player-markers)
 		POIMarker.Builder markerBuilder = POIMarker.builder()
 				.label(player.getName())
 				.detail(player.getName() + " <i>(offline)</i>")
@@ -81,46 +68,22 @@ public class MarkerHandler {
 		// We need to create a separate marker per map, because the map-storage that the icon is saved in
 		// is different for each map
 		for (BlueMapMap map : blueMapWorld.getMaps()) {
-			BufferedImage image = Main.config.useBlueMapSource ?
-					ImageUtils.GetBImgFromAPI(player, map.getAssetStorage()) :
-					ImageUtils.GetBImgFromURL(player);
-
-			// if no image is found, use default
-			if (image == null) {
-				Main.logger.warning("Playerhead image for " + player.getName() + " couldn't be loaded!" + (Main.config.verboseErrors ? "" : " (config: verboseErrors)"));
-				if (Main.config.verboseErrors) {
-					Main.logger.warning(" Couldn't find the playerhead image file in BlueMap's resources");
-					Main.logger.warning(" This is likely due to the fact that BlueMap was installed after they last logged off");
-					Main.logger.warning(" Falling back to a Steve skin...");
+			String fallbackIcon = "/assets/steve.png";
+			String assetName = "playerheads/" + player.getUniqueId() + ".png";
+			String imagePath;
+			try {
+				if(map.getAssetStorage().assetExists(assetName)) {
+					imagePath = map.getAssetStorage().getAssetUrl(assetName);
+				} else {
+					imagePath = fallbackIcon;
+					Main.logger.warning("Playerhead image for " + player.getName() + " couldn't be loaded, " +
+							"likely due to the player never having joined the server after BlueMap was installed. Using Steve head.");
 				}
-
-				image = this.fallbackIcon;
-			}
-
-			// if image is still null, skip
-			if (image == null) {
-				if (Main.config.verboseErrors) {
-					Main.logger.warning(" Couldn't load the default steve image!");
-					Main.logger.warning(" No marker will be created.");
-				}
-				continue;
-			}
-
-			// process image
-			//ImageUtils.Recolour(image);
-			//image = ImageUtils.Resize(image, 32, 32); // moved to css
-
-			// write image to asset storage
-			String assetName = "offlineplayerheads/" + player.getUniqueId() + ".png";
-			try (OutputStream out = map.getAssetStorage().writeAsset(assetName)) {
-				ImageIO.write(image, "png", out);
 			} catch (IOException ex) {
-				Main.logger.log(Level.SEVERE, "Failed to write playerhead image to BlueMaps AssetStorage!", ex);
-				continue;
+				imagePath = fallbackIcon;
+				logger.log(Level.SEVERE, "Failed to check if asset exists", ex);
 			}
 
-			// set marker-icon
-			String imagePath = map.getAssetStorage().getAssetUrl(assetName);
 			markerBuilder.icon(imagePath, 0, 0);
 
 			// get marker-set (or create new marker set if none found)
@@ -142,22 +105,27 @@ public class MarkerHandler {
 	 *
 	 * @param player The player to remove the marker for.
 	 */
-	public void remove(Player player) {
-		BlueMapAPI.getInstance().ifPresent(api -> {
-			// remove all markers with the players uuid
-			for (BlueMapMap map : api.getMaps()) {
-				MarkerSet set = map.getMarkerSets().get(Config.MARKER_SET_ID);
-				if (set != null) set.remove(player.getUniqueId().toString());
-			}
+	public static void remove(Player player) {
+		Optional<BlueMapAPI> optionalApi = BlueMapAPI.getInstance();
+		if (optionalApi.isEmpty()) {
+			logger.warning("Tried to remove a marker, but BlueMap wasn't loaded!");
+			return;
+		}
+		BlueMapAPI api = optionalApi.get();
 
-			Main.logger.info("Marker for " + player.getName() + " removed");
-		});
+		// remove all markers with the players uuid
+		for (BlueMapMap map : api.getMaps()) {
+			MarkerSet set = map.getMarkerSets().get(Config.MARKER_SET_ID);
+			if (set != null) set.remove(player.getUniqueId().toString());
+		}
+
+		Main.logger.info("Marker for " + player.getName() + " removed");
 	}
 
 	/**
 	 * Load in markers of all offline players by going through the playerdata NBT
 	 */
-	public void loadOfflineMarkers() {
+	public static void loadOfflineMarkers() {
 		//I really don't like "getWorlds().get(0)" as a way to get the main world, but as far as I can tell there is no other way
 		File playerDataFolder = new File(Bukkit.getWorlds().get(0).getWorldFolder(), "playerdata");
 		//Return if playerdata is missing for some reason.

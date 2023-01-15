@@ -1,1 +1,3 @@
 MarkerSetName: "Offline Players"
+DefaultHidden: false
+Toggleable: true

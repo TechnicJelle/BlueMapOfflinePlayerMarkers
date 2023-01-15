@@ -3,9 +3,11 @@
 	filter: grayscale(1);
 
     /* Pixel Scaling filter, just in case*/
-    -ms-interpolation-mode: nearest-neighbor; /* IE, only works on <img> tags */
-    image-rendering: crisp-edges; /* Firefox */
-    image-rendering: pixelated; /* Chromium + Safari */
+	-ms-interpolation-mode: nearest-neighbor;  /* IE 7+ (non-standard property) */
+	image-rendering: -webkit-crisp-edges; /* Safari 6 - 9 */
+	image-rendering: -moz-crisp-edges; /* Firefox 3.6 - 64 */
+	image-rendering: crisp-edges; /* Firefox 65+ */
+	image-rendering: pixelated; /* Chrome 41+, Edge 76+, Safari 10+ */
 }
 
 .bmopm-offline-player > .bm-marker-poi-icon {

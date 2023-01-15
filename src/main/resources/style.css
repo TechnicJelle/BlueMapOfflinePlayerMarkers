@@ -1,0 +1,32 @@
+
+.bmopm-offline-player {
+    filter: grayscale(1);
+}
+
+.bmopm-offline-player > .bm-marker-poi-icon {
+    width: 32px;
+    height: 32px;
+
+    /* can't use transform here because the poi-icon overwrites it already */
+    position: relative;
+    top: -16px;
+    left: -16px;
+
+    transition: width 0.3s, height 0.3s, top 0.3s, left 0.3s, opacity 0.3s !important;
+}
+
+.bmopm-offline-player > .bm-marker-poi-icon.bmopm-small {
+    width: 16px;
+    height: 16px;
+
+    top: -8px;
+    left: -8px;
+}
+
+.bmopm-offline-player > .bm-marker-poi-label {
+    white-space: nowrap;
+}
+
+.bmopm-offline-player > .bm-marker-poi-label > i {
+    color: var(--theme-fg-light);
+}

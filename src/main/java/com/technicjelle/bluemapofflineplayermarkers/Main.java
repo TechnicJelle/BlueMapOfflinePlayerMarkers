@@ -8,14 +8,26 @@ import org.bukkit.event.Listener;
 import org.bukkit.event.player.PlayerJoinEvent;
 import org.bukkit.event.player.PlayerQuitEvent;
 import org.bukkit.plugin.java.JavaPlugin;
+import org.jetbrains.annotations.Nullable;
 
+import javax.imageio.ImageIO;
+import java.awt.image.BufferedImage;
+import java.io.File;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.OutputStream;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.StandardOpenOption;
 import java.util.function.Consumer;
+import java.util.logging.Level;
 import java.util.logging.Logger;
 
 public final class Main extends JavaPlugin implements Listener {
 	public static Logger logger;
 	public static Config config;
 
+	@Nullable
 	public MarkerHandler markers;
 
 	@Override
@@ -36,11 +48,43 @@ public final class Main extends JavaPlugin implements Listener {
 
 		config = new Config(this);
 
-		markers = new MarkerHandler();
+		// "registerStyle" has to be invoked inside the consumer (=> not in the async scheduled task below)
+		api.getWebApp().registerStyle("assets/bmopm.css");
+		api.getWebApp().registerScript("assets/bmopm.js");
 
+		Path webroot = api.getWebApp().getWebRoot();
 		Bukkit.getScheduler().runTaskAsynchronously(this, () -> {
-			markers.attachToBlueMap(api);
-			markers.loadOfflineMarkers();
+			try {
+				// load steve
+				BufferedImage steve = ImageIO.read(new File(webroot + "/assets/steve.png"));
+
+				markers = new MarkerHandler(steve);
+				markers.loadOfflineMarkers();
+			} catch (IOException ex) {
+				Main.logger.log(Level.SEVERE, "Failed to load steve from BlueMap's webroot!", ex);
+			}
+
+			// update custom style
+			Path stylePath = webroot.resolve("assets").resolve("bmopm.css");
+			try (
+					InputStream in = getResource("style.css");
+					OutputStream out = Files.newOutputStream(stylePath, StandardOpenOption.CREATE, StandardOpenOption.TRUNCATE_EXISTING)
+			){
+				in.transferTo(out);
+			} catch (IOException ex) {
+				Main.logger.log(Level.SEVERE, "Failed to update bmopm.css in BlueMap's webroot!", ex);
+			}
+
+			// update custom script
+			Path scriptPath = webroot.resolve("assets").resolve("bmopm.js");
+			try (
+					InputStream in = getResource("script.js");
+					OutputStream out = Files.newOutputStream(scriptPath, StandardOpenOption.CREATE, StandardOpenOption.TRUNCATE_EXISTING)
+			){
+				in.transferTo(out);
+			} catch (IOException ex) {
+				Main.logger.log(Level.SEVERE, "Failed to update bmopm.js in BlueMap's webroot!", ex);
+			}
 		});
 	};
 
@@ -59,15 +103,15 @@ public final class Main extends JavaPlugin implements Listener {
 
 	@EventHandler
 	public void onJoin(PlayerJoinEvent e) {
-		Bukkit.getScheduler().runTaskAsynchronously(this, () ->
-				markers.remove(e.getPlayer())
-		);
+		Bukkit.getScheduler().runTaskAsynchronously(this, () -> {
+			if (markers != null) markers.remove(e.getPlayer());
+		});
 	}
 
 	@EventHandler
 	public void onLeave(PlayerQuitEvent e) {
-		Bukkit.getScheduler().runTaskAsynchronously(this, () ->
-				markers.add(e.getPlayer())
-		);
+		Bukkit.getScheduler().runTaskAsynchronously(this, () -> {
+			if (markers != null) markers.add(e.getPlayer());
+		});
 	}
 }

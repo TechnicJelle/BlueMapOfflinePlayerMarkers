@@ -1,6 +1,8 @@
 package com.technicjelle.bluemapofflineplayermarkers;
 
+import de.bluecolored.bluemap.api.AssetStorage;
 import de.bluecolored.bluemap.api.BlueMapAPI;
+import de.bluecolored.bluemap.api.BlueMapMap;
 import org.bukkit.OfflinePlayer;
 import org.bukkit.util.NumberConversions;
 import org.jetbrains.annotations.NotNull;
@@ -14,6 +16,9 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.net.MalformedURLException;
 import java.net.URL;
+import java.util.Objects;
+import java.util.Optional;
+import java.util.logging.Level;
 
 import static com.technicjelle.bluemapofflineplayermarkers.Main.config;
 import static com.technicjelle.bluemapofflineplayermarkers.Main.logger;
@@ -29,15 +34,15 @@ public class ImageUtils {
 		for (int y = 0; y < image.getHeight(); y++) {
 			for (int x = 0; x < image.getWidth(); x++) {
 				int rgb = image.getRGB(x, y);
-				int red = (rgb >> 16) & 0x0ff;
-				int green = (rgb >> 8) & 0x0ff;
-				int blue = (rgb) & 0x0ff;
+				int alpha = (rgb >> 24) & 0xff;
+				int red = (rgb >> 16) & 0xff;
+				int green = (rgb >> 8) & 0xff;
+				int blue = (rgb) & 0xff;
 
 				//https://tannerhelland.com/2011/10/01/grayscale-image-algorithm-vb6.html
 //				int grey = (red + green + blue) / 3; //average
 				int grey = NumberConversions.round(red * 0.3 + green * 0.59 + blue * 0.11); //luma
-				Color c = new Color(grey, grey, grey);
-				image.setRGB(x, y, c.getRGB());
+				image.setRGB(x, y, alpha << 24 | grey << 16 | grey << 8 | grey);
 			}
 		}
 	}
@@ -67,34 +72,22 @@ public class ImageUtils {
 	 * Gets the player image that BlueMap itself is using.
 	 *
 	 * @param player The player to get the image of.
-	 * @param api    The BlueMapAPI to use.
+	 * @param assetStorage The AssetStorage to load the image from.
 	 * @return The image of the player or {@code null} if an error occurred.
 	 */
-	public static @Nullable BufferedImage GetBImgFromAPI(@NotNull OfflinePlayer player, @NotNull BlueMapAPI api) {
-		BufferedImage result;
-		File f = new File(api.getWebApp().getWebRoot() + "/assets/playerheads/" + player.getUniqueId() + ".png");
-		if (f.exists()) {
-			try {
-				result = ImageIO.read(f);
-			} catch (IOException e) {
-				e.printStackTrace();
-				return null;
+	public static @Nullable BufferedImage GetBImgFromAPI(@NotNull OfflinePlayer player, @NotNull AssetStorage assetStorage) {
+		try {
+			Optional<InputStream> optIn = assetStorage.readAsset("playerheads/" + player.getUniqueId() + ".png");
+			if (optIn.isPresent()) {
+				try (InputStream in = optIn.get()) {
+					return ImageIO.read(in);
+				}
 			}
-		} else {
-			logger.warning("Marker for " + player.getName() + " couldn't be added!" + (config.verboseErrors ? "" : " (config: verboseErrors)"));
-			if (config.verboseErrors) {
-				logger.warning(" Couldn't find the playerhead image file in BlueMap's resources");
-				logger.warning(" This is likely due to the fact that BlueMap was installed after they last logged off");
-				logger.warning(" Falling back to a Steve skin...");
-			}
-			try {
-				result = ImageIO.read(new File(api.getWebApp().getWebRoot() + "/assets/steve.png"));
-			} catch (IOException e) {
-				e.printStackTrace();
-				return null;
-			}
+		} catch (IOException ex) {
+			Main.logger.log(Level.SEVERE, "Failed to load playerhead image from BlueMaps AssetStorage!", ex);
 		}
-		return result;
+
+		return null;
 	}
 
 	/**

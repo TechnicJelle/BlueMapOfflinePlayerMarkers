@@ -18,6 +18,8 @@ import org.bukkit.entity.Player;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
+import java.text.SimpleDateFormat;
+import java.util.Date;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
@@ -56,11 +58,17 @@ public class MarkerHandler {
 		BlueMapWorld blueMapWorld = api.getWorld(location.getWorld()).orElse(null);
 		if (blueMapWorld == null) return;
 
+		// Get moment of last login
+		Date date = new Date(player.getLastPlayed());
+		SimpleDateFormat formatter = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+		String lastLoginString = formatter.format(date);
+
 		// Create marker-template
 		// (add 1.8 to y to place the marker at the head-position of the player, like BlueMap does with its player-markers)
 		POIMarker.Builder markerBuilder = POIMarker.builder()
 				.label(player.getName())
-				.detail(player.getName() + " <i>(offline)</i>")
+				.detail(player.getName() + " <i>(offline)</i><br>"
+						+ "<p>" + lastLoginString + "</p>")
 				.styleClasses("bmopm-offline-player")
 				.position(location.getX(), location.getY() + 1.8, location.getZ());
 

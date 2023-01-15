@@ -18,8 +18,6 @@ import org.bukkit.entity.Player;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
-import java.text.SimpleDateFormat;
-import java.util.Date;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
@@ -54,6 +52,9 @@ public class MarkerHandler {
 			return;
 		}
 		BlueMapAPI api = optionalApi.get();
+
+		//If this player's visibility is disabled on the map, don't add the marker.
+		if (!api.getWebApp().getPlayerVisibility(player.getUniqueId())) return;
 
 		// Get BlueMapWorld for the location
 		BlueMapWorld blueMapWorld = api.getWorld(location.getWorld()).orElse(null);

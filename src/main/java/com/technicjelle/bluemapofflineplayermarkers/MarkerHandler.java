@@ -10,6 +10,7 @@ import de.bluecolored.bluemap.api.BlueMapWorld;
 import de.bluecolored.bluemap.api.markers.MarkerSet;
 import de.bluecolored.bluemap.api.markers.POIMarker;
 import org.bukkit.Bukkit;
+import org.bukkit.GameMode;
 import org.bukkit.Location;
 import org.bukkit.OfflinePlayer;
 import org.bukkit.World;
@@ -36,7 +37,7 @@ public class MarkerHandler {
 	 * @param player The player to add the marker for.
 	 */
 	public static void add(Player player) {
-		add(player, player.getLocation());
+		add(player, player.getLocation(), player.getGameMode());
 	}
 
 	/**
@@ -44,8 +45,9 @@ public class MarkerHandler {
 	 *
 	 * @param player   The player to add the marker for.
 	 * @param location The location to put the marker at.
+	 * @param gameMode The game mode of the player.
 	 */
-	public static void add(OfflinePlayer player, Location location) {
+	public static void add(OfflinePlayer player, Location location, GameMode gameMode) {
 		Optional<BlueMapAPI> optionalApi = BlueMapAPI.getInstance();
 		if (optionalApi.isEmpty()) {
 			logger.warning("Tried to add a marker, but BlueMap wasn't loaded!");
@@ -55,6 +57,9 @@ public class MarkerHandler {
 
 		//If this player's visibility is disabled on the map, don't add the marker.
 		if (!api.getWebApp().getPlayerVisibility(player.getUniqueId())) return;
+
+		//If this player's game mode is disabled on the map, don't add the marker.
+		if (config.hiddenGameModes.contains(gameMode)) return;
 
 		// Get BlueMapWorld for the location
 		BlueMapWorld blueMapWorld = api.getWorld(location.getWorld()).orElse(null);
@@ -162,6 +167,7 @@ public class MarkerHandler {
 			}
 
 			//Collect data
+			int gameModeInt = (int) nbtData.get("playerGameType").getValue();
 			long worldUUIDLeast = (long) nbtData.get("WorldUUIDLeast").getValue();
 			long worldUUIDMost = (long) nbtData.get("WorldUUIDMost").getValue();
 			@SuppressWarnings("unchecked") //Apparently this is just how it should be https://discord.com/channels/665868367416131594/771451216499965953/917450319259115550
@@ -174,8 +180,12 @@ public class MarkerHandler {
 			if (w == null || position.size() != 3) continue;
 			Location loc = new Location(w, position.get(0), position.get(1), position.get(2));
 
+			//Convert to game mode
+			@SuppressWarnings("deprecation")
+			GameMode gameMode = GameMode.getByValue(gameModeInt);
+
 			//Add marker
-			add(op, loc);
+			add(op, loc, gameMode);
 		}
 	}
 }

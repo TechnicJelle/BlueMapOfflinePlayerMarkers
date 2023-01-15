@@ -1,11 +1,14 @@
 package com.technicjelle.bluemapofflineplayermarkers;
 
+import org.bukkit.GameMode;
 import org.bukkit.configuration.file.FileConfiguration;
 import org.jetbrains.annotations.NotNull;
 
 import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Objects;
 
 import static com.technicjelle.bluemapofflineplayermarkers.Main.logger;
@@ -25,6 +28,7 @@ public class Config {
 	public boolean toggleable;
 	public boolean defaultHidden;
 	public long expireTimeInHours;
+	public List<GameMode> hiddenGameModes;
 
 	public Config(Main plugin) {
 		this.plugin = plugin;
@@ -48,5 +52,18 @@ public class Config {
 		toggleable = configFile().getBoolean("Toggleable");
 		defaultHidden = configFile().getBoolean("DefaultHidden");
 		expireTimeInHours = configFile().getLong("ExpireTimeInHours");
+		hiddenGameModes = parseGameModes(configFile().getStringList("HiddenGameModes"));
+	}
+
+	private List<GameMode> parseGameModes(List<String> hiddenGameModesStrings) {
+		ArrayList<GameMode> gameModes = new ArrayList<>();
+		for (String gm : hiddenGameModesStrings) {
+			try {
+				gameModes.add(GameMode.valueOf(gm.toUpperCase()));
+			} catch (IllegalArgumentException e) {
+				logger.warning("Invalid Game Mode: " + gm);
+			}
+		}
+		return gameModes;
 	}
 }

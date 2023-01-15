@@ -9,3 +9,7 @@ DefaultHidden: false
 # If you want to show all players, set this to 0.
 # Feel free to use a calculator to convert days to hours: https://www.google.com/search?q=days+to+hours+calculator
 ExpireTimeInHours: 0
+
+# If you want to hide players in certain game modes, add them here.
+HiddenGameModes:
+  - spectator

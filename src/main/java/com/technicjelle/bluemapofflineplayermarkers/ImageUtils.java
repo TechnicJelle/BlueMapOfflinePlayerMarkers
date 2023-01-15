@@ -20,6 +20,9 @@ import java.util.Objects;
 import java.util.Optional;
 import java.util.logging.Level;
 
+import static com.technicjelle.bluemapofflineplayermarkers.Main.config;
+import static com.technicjelle.bluemapofflineplayermarkers.Main.logger;
+
 public class ImageUtils {
 
 	/**
@@ -98,7 +101,7 @@ public class ImageUtils {
 	public static @Nullable BufferedImage GetBImgFromURL(@NotNull OfflinePlayer player) {
 		BufferedImage result;
 		try {
-			String url = Main.config.skinURL.toString()
+			String url = config.skinURL.toString()
 					.replace("{UUID}", player.getUniqueId().toString())
 					.replace("{USERNAME}", player.getName())
 					.replace("{NAME}", player.getName());

@@ -27,6 +27,9 @@ import java.util.UUID;
 import java.util.logging.Level;
 import java.util.stream.Collectors;
 
+import static com.technicjelle.bluemapofflineplayermarkers.Main.config;
+import static com.technicjelle.bluemapofflineplayermarkers.Main.logger;
+
 
 public class MarkerHandler {
 
@@ -57,7 +60,7 @@ public class MarkerHandler {
 	public void add(OfflinePlayer player, Location location) {
 		Optional<BlueMapAPI> optionalApi = BlueMapAPI.getInstance();
 		if (optionalApi.isEmpty()) {
-			Main.logger.warning("Tried to add a marker, but BlueMap wasn't loaded!");
+			logger.warning("Tried to add a marker, but BlueMap wasn't loaded!");
 			return;
 		}
 		BlueMapAPI api = optionalApi.get();
@@ -131,7 +134,7 @@ public class MarkerHandler {
 			markerSet.put(player.getUniqueId().toString(), markerBuilder.build());
 		}
 
-		Main.logger.info("Marker for " + player.getName() + " added");
+		logger.info("Marker for " + player.getName() + " added");
 	}
 
 	/**

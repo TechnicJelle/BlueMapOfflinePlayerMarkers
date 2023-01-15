@@ -34,15 +34,9 @@ public final class Main extends JavaPlugin implements Listener {
 	public void onEnable() {
 		new Metrics(this, 16425);
 
-		if(getDataFolder().mkdirs()) getLogger().info("Created plugin config directory");
-		File configFile = new File(getDataFolder(), "config.yml");
-		if (!configFile.exists()) {
-			try {
-				Files.copy(getResource("config.yml"), configFile.toPath());
-			} catch (IOException e) {
-				e.printStackTrace();
-			}
-		}
+		logger = getLogger();
+
+		getServer().getPluginManager().registerEvents(this, this);
 
 		//all actual startup and shutdown logic moved to BlueMapAPI enable/disable methods, so `/bluemap reload` also reloads this plugin
 		BlueMapAPI.onEnable(onEnableListener);
@@ -50,10 +44,7 @@ public final class Main extends JavaPlugin implements Listener {
 	}
 
 	Consumer<BlueMapAPI> onEnableListener = api -> {
-		logger = getLogger();
 		logger.info("API Ready! BlueMap Offline Player Markers plugin enabled!");
-
-		getServer().getPluginManager().registerEvents(this, this);
 
 		config = new Config(this);
 
@@ -98,7 +89,7 @@ public final class Main extends JavaPlugin implements Listener {
 	};
 
 	Consumer<BlueMapAPI> onDisableListener = api -> {
-		getLogger().info("API disabled! BlueMap Offline Player Markers shutting down...");
+		logger.info("API disabled! BlueMap Offline Player Markers shutting down...");
 		//not much to do here, actually...
 	};
 
@@ -106,7 +97,7 @@ public final class Main extends JavaPlugin implements Listener {
 	public void onDisable() {
 		BlueMapAPI.unregisterListener(onEnableListener);
 		BlueMapAPI.unregisterListener(onDisableListener);
-		getLogger().info("BlueMap Offline Player Markers plugin disabled!");
+		logger.info("BlueMap Offline Player Markers plugin disabled!");
 	}
 
 

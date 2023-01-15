@@ -17,3 +17,15 @@ bluemap.events.addEventListener("bluemapCameraMoved", event => {
 		}
 	}
 });
+
+class LocaleDateTime extends HTMLElement {
+	constructor() {
+		super();
+		const timestamp = this.getAttribute("data-timestamp");
+		const dateString = new Date(parseInt(timestamp, 10)).toLocaleString();
+		this.innerText = dateString;
+	}
+}
+
+
+customElements.define("bmopm-datetime", LocaleDateTime);

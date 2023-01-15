@@ -1,3 +1,11 @@
+# Marker Set Options
+# Documentation: https://bluemap.bluecolored.de/wiki/customization/Markers.html#marker-sets
 MarkerSetName: "Offline Players"
 DefaultHidden: false
 Toggleable: true
+
+# By default, this plugin will show everyone who has ever joined the server.
+# If you want to show only players who have joined in the last X hours, set this to a number greater than 0.
+# If you want to show all players, set this to 0.
+# Feel free to use a calculator to convert days to hours: https://www.google.com/search?q=days+to+hours+calculator
+ExpireTimeInHours: 0

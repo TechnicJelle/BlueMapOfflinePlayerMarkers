@@ -24,6 +24,7 @@ public class Config {
 	public String markerSetName;
 	public boolean defaultHidden;
 	public boolean toggleable;
+	public long expireTimeInHours;
 
 	public Config(Main plugin) {
 		this.plugin = plugin;
@@ -46,5 +47,6 @@ public class Config {
 		markerSetName = configFile().getString("MarkerSetName");
 		defaultHidden = configFile().getBoolean("DefaultHidden");
 		toggleable = configFile().getBoolean("Toggleable");
+		expireTimeInHours = configFile().getLong("ExpireTimeInHours");
 	}
 }

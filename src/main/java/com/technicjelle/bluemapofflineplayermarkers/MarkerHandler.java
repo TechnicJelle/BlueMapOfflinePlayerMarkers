@@ -26,6 +26,7 @@ import java.util.UUID;
 import java.util.logging.Level;
 import java.util.stream.Collectors;
 
+import static com.technicjelle.bluemapofflineplayermarkers.Main.config;
 import static com.technicjelle.bluemapofflineplayermarkers.Main.logger;
 
 
@@ -84,7 +85,7 @@ public class MarkerHandler {
 					imagePath = map.getAssetStorage().getAssetUrl(assetName);
 				} else {
 					imagePath = fallbackIcon;
-					Main.logger.warning("Playerhead image for " + player.getName() + " couldn't be loaded, " +
+					logger.warning("Playerhead image for " + player.getName() + " couldn't be loaded, " +
 							"likely due to the player never having joined the server after BlueMap was installed. Using Steve head.");
 				}
 			} catch (IOException ex) {
@@ -96,9 +97,9 @@ public class MarkerHandler {
 
 			// get marker-set (or create new marker set if none found)
 			MarkerSet markerSet = map.getMarkerSets().computeIfAbsent(Config.MARKER_SET_ID, id -> MarkerSet.builder()
-					.label(Main.config.markerSetName)
-					.defaultHidden(Main.config.defaultHidden)
-					.toggleable(Main.config.toggleable)
+					.label(config.markerSetName)
+					.defaultHidden(config.defaultHidden)
+					.toggleable(config.toggleable)
 					.build());
 
 			// add marker
@@ -127,7 +128,7 @@ public class MarkerHandler {
 			if (set != null) set.remove(player.getUniqueId().toString());
 		}
 
-		Main.logger.info("Marker for " + player.getName() + " removed");
+		logger.info("Marker for " + player.getName() + " removed");
 	}
 
 	/**
@@ -142,6 +143,13 @@ public class MarkerHandler {
 		for (OfflinePlayer op : Bukkit.getOfflinePlayers()) {
 			//If player is online, ignore (I don't know why the method is called "getOfflinePlayers" when it also contains all online players...)
 			if (op.isOnline()) continue;
+
+			long timeSinceLastPlayed = System.currentTimeMillis() - op.getLastPlayed();
+//			logger.info("Player " + op.getName() + " was last seen " + timeSinceLastPlayed + "ms ago");
+			if (config.expireTimeInHours > 0 && timeSinceLastPlayed > config.expireTimeInHours * 60 * 60 * 1000) {
+				logger.info("Player " + op.getName() + " was last seen too long ago, skipping");
+				continue;
+			}
 
 			File dataFile = new File(playerDataFolder, op.getUniqueId() + ".dat");
 

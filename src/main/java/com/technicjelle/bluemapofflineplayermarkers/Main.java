@@ -29,6 +29,8 @@ public final class Main extends JavaPlugin implements Listener {
 
 		logger = getLogger();
 
+		UpdateChecker.check("TechnicJelle", "BlueMapOfflinePlayerMarkers", getDescription().getVersion());
+
 		getServer().getPluginManager().registerEvents(this, this);
 
 		//all actual startup and shutdown logic moved to BlueMapAPI enable/disable methods, so `/bluemap reload` also reloads this plugin
@@ -38,6 +40,7 @@ public final class Main extends JavaPlugin implements Listener {
 
 	Consumer<BlueMapAPI> onEnableListener = api -> {
 		logger.info("API Ready! BlueMap Offline Player Markers plugin enabled!");
+		UpdateChecker.logUpdateMessage(logger);
 
 		config = new Config(this);
 

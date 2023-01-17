@@ -120,7 +120,6 @@ public class MarkerHandler {
 	 */
 	private static boolean createPlayerHead(OfflinePlayer player, String assetName, BlueMapAPI api, BlueMapMap map) {
 		SkinProvider skinProvider = api.getPlugin().getSkinProvider();
-		logger.info("SkinProvider: " + skinProvider.getClass().getName());
 		try {
 			Optional<BufferedImage> oImgSkin = skinProvider.load(player.getUniqueId());
 			if (oImgSkin.isEmpty()) {

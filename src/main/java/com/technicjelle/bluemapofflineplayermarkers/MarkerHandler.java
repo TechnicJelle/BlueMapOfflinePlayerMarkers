@@ -9,6 +9,7 @@ import de.bluecolored.bluemap.api.BlueMapMap;
 import de.bluecolored.bluemap.api.BlueMapWorld;
 import de.bluecolored.bluemap.api.markers.MarkerSet;
 import de.bluecolored.bluemap.api.markers.POIMarker;
+import de.bluecolored.bluemap.api.plugin.SkinProvider;
 import org.bukkit.Bukkit;
 import org.bukkit.GameMode;
 import org.bukkit.Location;
@@ -16,9 +17,12 @@ import org.bukkit.OfflinePlayer;
 import org.bukkit.World;
 import org.bukkit.entity.Player;
 
+import javax.imageio.ImageIO;
+import java.awt.image.BufferedImage;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
+import java.io.OutputStream;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
@@ -80,18 +84,16 @@ public class MarkerHandler {
 		for (BlueMapMap map : blueMapWorld.getMaps()) {
 			String fallbackIcon = "/assets/steve.png";
 			String assetName = "playerheads/" + player.getUniqueId() + ".png";
-			String imagePath;
+			String imagePath = map.getAssetStorage().getAssetUrl(assetName);
+
 			try {
-				if(map.getAssetStorage().assetExists(assetName)) {
-					imagePath = map.getAssetStorage().getAssetUrl(assetName);
-				} else {
-					imagePath = fallbackIcon;
-					logger.warning("Playerhead image for " + player.getName() + " couldn't be loaded, " +
-							"likely due to the player never having joined the server after BlueMap was installed. Using Steve head.");
+				if (!map.getAssetStorage().assetExists(assetName)) {
+					if (createPlayerHead(player, assetName, api, map))
+						imagePath = fallbackIcon;
 				}
-			} catch (IOException ex) {
+			} catch (IOException e) {
+				logger.log(Level.SEVERE, "Failed to check if asset " + assetName + " exists", e);
 				imagePath = fallbackIcon;
-				logger.log(Level.SEVERE, "Failed to check if asset exists", ex);
 			}
 
 			markerBuilder.icon(imagePath, 0, 0);
@@ -108,6 +110,38 @@ public class MarkerHandler {
 		}
 
 		logger.info("Marker for " + player.getName() + " added");
+	}
+
+	/**
+	 * For when BlueMap doesn't have an icon for this player yet, so we need to make it create one.
+	 * @return Whether the player head was created successfully. <br>
+	 * If <code>true</code>, the player head was created successfully.<br>
+	 * If <code>false</code>, the player head was not created successfully and the fallback icon should be used instead.
+	 */
+	private static boolean createPlayerHead(OfflinePlayer player, String assetName, BlueMapAPI api, BlueMapMap map) {
+		SkinProvider skinProvider = api.getPlugin().getSkinProvider();
+		logger.info("SkinProvider: " + skinProvider.getClass().getName());
+		try {
+			Optional<BufferedImage> oImgSkin = skinProvider.load(player.getUniqueId());
+			if (oImgSkin.isEmpty()) {
+				logger.log(Level.SEVERE, player.getName() + " doesn't have a skin");
+				return false; // Failure
+			}
+
+			logger.info("Saving skin for " + player.getName() + " to " + assetName);
+			try (OutputStream out = map.getAssetStorage().writeAsset(assetName)) {
+				BufferedImage head = api.getPlugin().getPlayerMarkerIconFactory()
+						.apply(player.getUniqueId(), oImgSkin.get());
+				ImageIO.write(head, "png", out);
+				return true; // Success
+			} catch (IOException e) {
+				logger.log(Level.SEVERE, "Failed to write " + player.getName() + "'s head to asset-storage", e);
+			}
+		} catch (IOException e) {
+			logger.log(Level.SEVERE, "Failed to load skin for player " + player.getName(), e);
+		}
+
+		return false; // Failure
 	}
 
 	/**

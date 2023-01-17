@@ -1,5 +1,5 @@
+//TechnicJelle's GitHub Update Checker v1
 package com.technicjelle.bluemapofflineplayermarkers;
-
 
 import java.io.IOException;
 import java.net.HttpURLConnection;

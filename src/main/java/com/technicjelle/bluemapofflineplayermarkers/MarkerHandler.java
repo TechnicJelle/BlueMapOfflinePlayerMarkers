@@ -88,7 +88,7 @@ public class MarkerHandler {
 
 			try {
 				if (!map.getAssetStorage().assetExists(assetName)) {
-					if (createPlayerHead(player, assetName, api, map))
+					if (!createPlayerHead(player, assetName, api, map))
 						imagePath = fallbackIcon;
 				}
 			} catch (IOException e) {

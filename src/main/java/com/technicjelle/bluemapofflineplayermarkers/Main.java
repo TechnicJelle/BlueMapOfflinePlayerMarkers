@@ -44,29 +44,32 @@ public final class Main extends JavaPlugin implements Listener {
 
 		config = new Config(this);
 
-		Path webroot = api.getWebApp().getWebRoot();
-
 		// "registerStyle" has to be invoked inside the consumer (=> not in the async scheduled task below)
-		copyResourceToBlueMapWebApp(webroot, "style.css", "bmopm.css");
-		api.getWebApp().registerStyle("assets/bmopm.css");
-
-		copyResourceToBlueMapWebApp(webroot, "script.js", "bmopm.js");
-		api.getWebApp().registerScript("assets/bmopm.js");
+		try {
+			copyResourceToBlueMapWebApp(api, "style.css", "bmopm.css");
+			copyResourceToBlueMapWebApp(api, "script.js", "bmopm.js");
+		} catch (IOException e) {
+			logger.log(Level.SEVERE, "Failed to copy resources to BlueMap webapp!", e);
+		}
 
 		//create marker handler and add all offline players in a separate thread, so the server doesn't hang up while it's going
 		Bukkit.getScheduler().runTaskAsynchronously(this, MarkerHandler::loadOfflineMarkers);
 	};
 
-	private void copyResourceToBlueMapWebApp(Path webroot, String fromResource, String toAsset) {
-		Path toPath = webroot.resolve("assets").resolve(toAsset);
+	private void copyResourceToBlueMapWebApp(BlueMapAPI api, String fromResource, String toAsset) throws IOException {
+		Path toPath = api.getWebApp().getWebRoot().resolve("assets").resolve(toAsset);
+		Files.createDirectories(toPath.getParent());
 		try (
 				InputStream in = getResource(fromResource);
 				OutputStream out = Files.newOutputStream(toPath, StandardOpenOption.CREATE, StandardOpenOption.TRUNCATE_EXISTING)
 		){
+			if (in == null) throw new IOException("Resource not found: " + fromResource);
 			in.transferTo(out);
-		} catch (IOException ex) {
-			logger.log(Level.SEVERE, "Failed to update " + toAsset + " in BlueMap's webroot!", ex);
 		}
+		String assetPath = "assets/" + toAsset;
+		if (toAsset.endsWith(".js")) api.getWebApp().registerScript(assetPath);
+		if (toAsset.endsWith(".css")) api.getWebApp().registerStyle(assetPath);
+
 	}
 
 	Consumer<BlueMapAPI> onDisableListener = api -> {

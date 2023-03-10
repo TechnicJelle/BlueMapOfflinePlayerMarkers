@@ -82,7 +82,7 @@ public class MarkerHandler {
 		// We need to create a separate marker per map, because the map-storage that the icon is saved in
 		// is different for each map
 		for (BlueMapMap map : blueMapWorld.getMaps()) {
-			String fallbackIcon = "/assets/steve.png";
+			String fallbackIcon = "assets/steve.png";
 			String assetName = "playerheads/" + player.getUniqueId() + ".png";
 			String imagePath = map.getAssetStorage().getAssetUrl(assetName);
 

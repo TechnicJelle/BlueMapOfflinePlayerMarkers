@@ -16,7 +16,7 @@ To reload this plugin, just reload BlueMap itself with `/bluemap reload`.
 If you want specific players to not get offline markers, you can hide them from BlueMap
 by using a plugin like [BlueMapPlayerControl](https://github.com/TechnicJelle/BlueMapPlayerControl) (also by me).
 
-For a Fabric port of this plugin, please see this [fork by syorito-hatsuki](https://github.com/syorito-hatsuki/BlueMapOfflinePlayerMarkersFabric)
+For a Fabric port of this plugin, please see [this fork by syorito-hatsuki](https://github.com/syorito-hatsuki/BlueMapOfflinePlayerMarkersFabric)
 
 ## [Click here to download!](../../releases/latest)
 

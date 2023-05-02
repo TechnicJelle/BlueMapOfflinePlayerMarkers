@@ -181,7 +181,7 @@ public class MarkerHandler {
 			long timeSinceLastPlayed = System.currentTimeMillis() - op.getLastPlayed();
 //			logger.info("Player " + op.getName() + " was last seen " + timeSinceLastPlayed + "ms ago");
 			if (config.expireTimeInHours > 0 && timeSinceLastPlayed > config.expireTimeInHours * 60 * 60 * 1000) {
-				logger.info("Player " + op.getName() + " was last seen too long ago, skipping");
+				logger.fine("Player " + op.getName() + " was last seen too long ago, skipping");
 				continue;
 			}
 

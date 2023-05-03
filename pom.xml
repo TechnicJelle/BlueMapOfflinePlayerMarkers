@@ -79,6 +79,11 @@
 
 	<dependencies>
 		<dependency>
+			<groupId>com.github.TechnicJelle</groupId>
+			<artifactId>UpdateCheckerJava</artifactId>
+			<version>v1.1</version>
+		</dependency>
+		<dependency>
 			<groupId>com.destroystokyo.paper</groupId>
 			<artifactId>paper-api</artifactId>
 			<version>1.13-R0.1-SNAPSHOT</version>

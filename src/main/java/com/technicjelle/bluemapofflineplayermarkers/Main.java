@@ -8,6 +8,8 @@ import org.bukkit.event.Listener;
 import org.bukkit.event.player.PlayerJoinEvent;
 import org.bukkit.event.player.PlayerQuitEvent;
 import org.bukkit.plugin.java.JavaPlugin;
+import org.jetbrains.annotations.NotNull;
+import com.technicjelle.UpdateChecker;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -29,7 +31,7 @@ public final class Main extends JavaPlugin implements Listener {
 
 		logger = getLogger();
 
-		UpdateChecker.check("TechnicJelle", "BlueMapOfflinePlayerMarkers", getDescription().getVersion());
+		UpdateChecker.checkAsync("TechnicJelle", "BlueMapOfflinePlayerMarkers", getDescription().getVersion());
 
 		getServer().getPluginManager().registerEvents(this, this);
 

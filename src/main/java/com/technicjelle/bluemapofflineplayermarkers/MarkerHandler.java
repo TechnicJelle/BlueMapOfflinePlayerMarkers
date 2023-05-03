@@ -121,13 +121,13 @@ public class MarkerHandler {
 	private static boolean createPlayerHead(OfflinePlayer player, String assetName, BlueMapAPI api, BlueMapMap map) {
 		SkinProvider skinProvider = api.getPlugin().getSkinProvider();
 		try {
+			logger.info("Getting skin for " + player.getName() + " and saving it to " + assetName);
 			Optional<BufferedImage> oImgSkin = skinProvider.load(player.getUniqueId());
 			if (oImgSkin.isEmpty()) {
 				logger.log(Level.SEVERE, player.getName() + " doesn't have a skin");
 				return false; // Failure
 			}
 
-			logger.info("Saving skin for " + player.getName() + " to " + assetName);
 			try (OutputStream out = map.getAssetStorage().writeAsset(assetName)) {
 				BufferedImage head = api.getPlugin().getPlayerMarkerIconFactory()
 						.apply(player.getUniqueId(), oImgSkin.get());

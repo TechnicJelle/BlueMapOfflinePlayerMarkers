@@ -14,7 +14,6 @@ import com.technicjelle.UpdateChecker;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
-import java.net.MalformedURLException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.StandardOpenOption;
@@ -33,12 +32,8 @@ public final class Main extends JavaPlugin implements Listener {
 
 		logger = getLogger();
 
-		try {
-			updateChecker = new UpdateChecker("TechnicJelle", "BlueMapOfflinePlayerMarkers", getDescription().getVersion());
-			updateChecker.checkAsync();
-		} catch (MalformedURLException e) {
-			throw new RuntimeException(e);
-		}
+		updateChecker = new UpdateChecker("TechnicJelle", "BlueMapOfflinePlayerMarkers", getDescription().getVersion());
+		updateChecker.checkAsync();
 
 		getServer().getPluginManager().registerEvents(this, this);
 

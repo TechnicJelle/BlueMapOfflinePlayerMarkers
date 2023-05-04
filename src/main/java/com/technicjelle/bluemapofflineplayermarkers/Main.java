@@ -14,6 +14,7 @@ import com.technicjelle.UpdateChecker;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
+import java.net.MalformedURLException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.StandardOpenOption;
@@ -24,6 +25,7 @@ import java.util.logging.Logger;
 public final class Main extends JavaPlugin implements Listener {
 	public static Logger logger;
 	public static Config config;
+	private UpdateChecker updateChecker;
 
 	@Override
 	public void onEnable() {
@@ -31,7 +33,12 @@ public final class Main extends JavaPlugin implements Listener {
 
 		logger = getLogger();
 
-		UpdateChecker.checkAsync("TechnicJelle", "BlueMapOfflinePlayerMarkers", getDescription().getVersion());
+		try {
+			updateChecker = new UpdateChecker("TechnicJelle", "BlueMapOfflinePlayerMarkers", getDescription().getVersion());
+			updateChecker.checkAsync();
+		} catch (MalformedURLException e) {
+			throw new RuntimeException(e);
+		}
 
 		getServer().getPluginManager().registerEvents(this, this);
 
@@ -42,7 +49,7 @@ public final class Main extends JavaPlugin implements Listener {
 
 	Consumer<BlueMapAPI> onEnableListener = api -> {
 		logger.info("API Ready! BlueMap Offline Player Markers plugin enabled!");
-		UpdateChecker.logUpdateMessage(logger);
+		updateChecker.logUpdateMessage(logger);
 
 		config = new Config(this);
 

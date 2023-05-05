@@ -4,43 +4,37 @@ import com.flowpowered.nbt.CompoundMap;
 import com.flowpowered.nbt.CompoundTag;
 import com.flowpowered.nbt.DoubleTag;
 import com.flowpowered.nbt.stream.NBTInputStream;
+import com.technicjelle.BMUtils;
 import de.bluecolored.bluemap.api.BlueMapAPI;
 import de.bluecolored.bluemap.api.BlueMapMap;
 import de.bluecolored.bluemap.api.BlueMapWorld;
 import de.bluecolored.bluemap.api.markers.MarkerSet;
 import de.bluecolored.bluemap.api.markers.POIMarker;
-import de.bluecolored.bluemap.api.plugin.SkinProvider;
-import org.bukkit.Bukkit;
-import org.bukkit.GameMode;
-import org.bukkit.Location;
-import org.bukkit.OfflinePlayer;
-import org.bukkit.World;
+import org.bukkit.*;
 import org.bukkit.entity.Player;
 
-import javax.imageio.ImageIO;
-import java.awt.image.BufferedImage;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
-import java.io.OutputStream;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
-import java.util.logging.Level;
 import java.util.stream.Collectors;
-
-import static com.technicjelle.bluemapofflineplayermarkers.Main.config;
-import static com.technicjelle.bluemapofflineplayermarkers.Main.logger;
 
 
 public class MarkerHandler {
+	private final BlueMapOfflinePlayerMarkers plugin;
+
+	MarkerHandler(BlueMapOfflinePlayerMarkers plugin) {
+		this.plugin = plugin;
+	}
 
 	/**
 	 * Adds a player marker to the map.
 	 *
 	 * @param player The player to add the marker for.
 	 */
-	public static void add(Player player) {
+	public void add(Player player) {
 		add(player, player.getLocation(), player.getGameMode());
 	}
 
@@ -51,10 +45,10 @@ public class MarkerHandler {
 	 * @param location The location to put the marker at.
 	 * @param gameMode The game mode of the player.
 	 */
-	public static void add(OfflinePlayer player, Location location, GameMode gameMode) {
+	public void add(OfflinePlayer player, Location location, GameMode gameMode) {
 		Optional<BlueMapAPI> optionalApi = BlueMapAPI.getInstance();
 		if (optionalApi.isEmpty()) {
-			logger.warning("Tried to add a marker, but BlueMap wasn't loaded!");
+			plugin.getLogger().warning("Tried to add a marker, but BlueMap wasn't loaded!");
 			return;
 		}
 		BlueMapAPI api = optionalApi.get();
@@ -63,7 +57,7 @@ public class MarkerHandler {
 		if (!api.getWebApp().getPlayerVisibility(player.getUniqueId())) return;
 
 		//If this player's game mode is disabled on the map, don't add the marker.
-		if (config.hiddenGameModes.contains(gameMode)) return;
+		if (plugin.getMyConfig().hiddenGameModes.contains(gameMode)) return;
 
 		// Get BlueMapWorld for the location
 		BlueMapWorld blueMapWorld = api.getWorld(location.getWorld()).orElse(null);
@@ -82,76 +76,32 @@ public class MarkerHandler {
 		// We need to create a separate marker per map, because the map-storage that the icon is saved in
 		// is different for each map
 		for (BlueMapMap map : blueMapWorld.getMaps()) {
-			String fallbackIcon = "assets/steve.png";
-			String assetName = "playerheads/" + player.getUniqueId() + ".png";
-			String imagePath = map.getAssetStorage().getAssetUrl(assetName);
-
-			try {
-				if (!map.getAssetStorage().assetExists(assetName)) {
-					if (!createPlayerHead(player, assetName, api, map))
-						imagePath = fallbackIcon;
-				}
-			} catch (IOException e) {
-				logger.log(Level.SEVERE, "Failed to check if asset " + assetName + " exists", e);
-				imagePath = fallbackIcon;
-			}
-
-			markerBuilder.icon(imagePath, 0, 0);
+			markerBuilder.icon(BMUtils.getPlayerHeadIconAddress(api, player.getUniqueId(), map), 0, 0); // centered with CSS instead
 
 			// get marker-set (or create new marker set if none found)
 			MarkerSet markerSet = map.getMarkerSets().computeIfAbsent(Config.MARKER_SET_ID, id -> MarkerSet.builder()
-					.label(config.markerSetName)
-					.toggleable(config.toggleable)
-					.defaultHidden(config.defaultHidden)
+					.label(plugin.getMyConfig().markerSetName)
+					.toggleable(plugin.getMyConfig().toggleable)
+					.defaultHidden(plugin.getMyConfig().defaultHidden)
 					.build());
 
 			// add marker
 			markerSet.put(player.getUniqueId().toString(), markerBuilder.build());
 		}
 
-		logger.info("Marker for " + player.getName() + " added");
+		plugin.getLogger().info("Marker for " + player.getName() + " added");
 	}
 
-	/**
-	 * For when BlueMap doesn't have an icon for this player yet, so we need to make it create one.
-	 * @return Whether the player head was created successfully. <br>
-	 * If <code>true</code>, the player head was created successfully.<br>
-	 * If <code>false</code>, the player head was not created successfully and the fallback icon should be used instead.
-	 */
-	private static boolean createPlayerHead(OfflinePlayer player, String assetName, BlueMapAPI api, BlueMapMap map) {
-		SkinProvider skinProvider = api.getPlugin().getSkinProvider();
-		try {
-			logger.info("Getting skin for " + player.getName() + " and saving it to " + assetName);
-			Optional<BufferedImage> oImgSkin = skinProvider.load(player.getUniqueId());
-			if (oImgSkin.isEmpty()) {
-				logger.log(Level.SEVERE, player.getName() + " doesn't have a skin");
-				return false; // Failure
-			}
-
-			try (OutputStream out = map.getAssetStorage().writeAsset(assetName)) {
-				BufferedImage head = api.getPlugin().getPlayerMarkerIconFactory()
-						.apply(player.getUniqueId(), oImgSkin.get());
-				ImageIO.write(head, "png", out);
-				return true; // Success
-			} catch (IOException e) {
-				logger.log(Level.SEVERE, "Failed to write " + player.getName() + "'s head to asset-storage", e);
-			}
-		} catch (IOException e) {
-			logger.log(Level.SEVERE, "Failed to load skin for player " + player.getName(), e);
-		}
-
-		return false; // Failure
-	}
 
 	/**
 	 * Removes a player marker from the map.
 	 *
 	 * @param player The player to remove the marker for.
 	 */
-	public static void remove(Player player) {
+	public void remove(Player player) {
 		Optional<BlueMapAPI> optionalApi = BlueMapAPI.getInstance();
 		if (optionalApi.isEmpty()) {
-			logger.warning("Tried to remove a marker, but BlueMap wasn't loaded!");
+			plugin.getLogger().warning("Tried to remove a marker, but BlueMap wasn't loaded!");
 			return;
 		}
 		BlueMapAPI api = optionalApi.get();
@@ -162,13 +112,13 @@ public class MarkerHandler {
 			if (set != null) set.remove(player.getUniqueId().toString());
 		}
 
-		logger.info("Marker for " + player.getName() + " removed");
+		plugin.getLogger().info("Marker for " + player.getName() + " removed");
 	}
 
 	/**
 	 * Load in markers of all offline players by going through the playerdata NBT
 	 */
-	public static void loadOfflineMarkers() {
+	public void loadOfflineMarkers() {
 		//I really don't like "getWorlds().get(0)" as a way to get the main world, but as far as I can tell there is no other way
 		File playerDataFolder = new File(Bukkit.getWorlds().get(0).getWorldFolder(), "playerdata");
 		//Return if playerdata is missing for some reason.
@@ -180,8 +130,8 @@ public class MarkerHandler {
 
 			long timeSinceLastPlayed = System.currentTimeMillis() - op.getLastPlayed();
 //			logger.info("Player " + op.getName() + " was last seen " + timeSinceLastPlayed + "ms ago");
-			if (config.expireTimeInHours > 0 && timeSinceLastPlayed > config.expireTimeInHours * 60 * 60 * 1000) {
-				logger.fine("Player " + op.getName() + " was last seen too long ago, skipping");
+			if (plugin.getMyConfig().expireTimeInHours > 0 && timeSinceLastPlayed > plugin.getMyConfig().expireTimeInHours * 60 * 60 * 1000) {
+				plugin.getLogger().fine("Player " + op.getName() + " was last seen too long ago, skipping");
 				continue;
 			}
 

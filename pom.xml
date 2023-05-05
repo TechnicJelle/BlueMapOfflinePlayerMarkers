@@ -82,6 +82,13 @@
 			<groupId>com.github.TechnicJelle</groupId>
 			<artifactId>UpdateCheckerJava</artifactId>
 			<version>v2.1</version>
+			<scope>compile</scope>
+		</dependency>
+		<dependency>
+			<groupId>com.github.TechnicJelle</groupId>
+			<artifactId>BMUtils</artifactId>
+			<version>1.0</version>
+			<scope>compile</scope>
 		</dependency>
 		<dependency>
 			<groupId>com.destroystokyo.paper</groupId>

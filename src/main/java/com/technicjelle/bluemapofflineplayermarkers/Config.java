@@ -2,7 +2,6 @@ package com.technicjelle.bluemapofflineplayermarkers;
 
 import org.bukkit.GameMode;
 import org.bukkit.configuration.file.FileConfiguration;
-import org.jetbrains.annotations.NotNull;
 
 import java.io.File;
 import java.io.IOException;
@@ -11,18 +10,10 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 
-import static com.technicjelle.bluemapofflineplayermarkers.Main.logger;
-
 public class Config {
-
 	public static final String MARKER_SET_ID = "offplrs";
 
-	private final Main plugin;
-
-	@NotNull
-	private FileConfiguration configFile() {
-		return plugin.getConfig();
-	}
+	private final BlueMapOfflinePlayerMarkers plugin;
 
 	public String markerSetName;
 	public boolean toggleable;
@@ -30,14 +21,14 @@ public class Config {
 	public long expireTimeInHours;
 	public List<GameMode> hiddenGameModes;
 
-	public Config(Main plugin) {
+	public Config(BlueMapOfflinePlayerMarkers plugin) {
 		this.plugin = plugin;
 
-		if(plugin.getDataFolder().mkdirs()) logger.info("Created plugin config directory");
+		if (plugin.getDataFolder().mkdirs()) plugin.getLogger().info("Created plugin config directory");
 		File configFile = new File(plugin.getDataFolder(), "config.yml");
 		if (!configFile.exists()) {
 			try {
-				logger.info("Creating config file");
+				plugin.getLogger().info("Creating config file");
 				Files.copy(Objects.requireNonNull(plugin.getResource("config.yml")), configFile.toPath());
 			} catch (IOException e) {
 				e.printStackTrace();
@@ -61,9 +52,13 @@ public class Config {
 			try {
 				gameModes.add(GameMode.valueOf(gm.toUpperCase()));
 			} catch (IllegalArgumentException e) {
-				logger.warning("Invalid Game Mode: " + gm);
+				plugin.getLogger().warning("Invalid Game Mode: " + gm);
 			}
 		}
 		return gameModes;
+	}
+
+	private FileConfiguration configFile() {
+		return plugin.getConfig();
 	}
 }

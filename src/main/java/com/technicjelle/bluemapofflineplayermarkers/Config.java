@@ -1,14 +1,12 @@
 package com.technicjelle.bluemapofflineplayermarkers;
 
+import com.technicjelle.MCUtils;
 import org.bukkit.GameMode;
 import org.bukkit.configuration.file.FileConfiguration;
 
-import java.io.File;
 import java.io.IOException;
-import java.nio.file.Files;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Objects;
 
 public class Config {
 	public static final String MARKER_SET_ID = "offplrs";
@@ -24,15 +22,10 @@ public class Config {
 	public Config(BlueMapOfflinePlayerMarkers plugin) {
 		this.plugin = plugin;
 
-		if (plugin.getDataFolder().mkdirs()) plugin.getLogger().info("Created plugin config directory");
-		File configFile = new File(plugin.getDataFolder(), "config.yml");
-		if (!configFile.exists()) {
-			try {
-				plugin.getLogger().info("Creating config file");
-				Files.copy(Objects.requireNonNull(plugin.getResource("config.yml")), configFile.toPath());
-			} catch (IOException e) {
-				e.printStackTrace();
-			}
+		try {
+			MCUtils.copyPluginResourceToConfigDir(plugin, "config.yml", "config.yml", false);
+		} catch (IOException e) {
+			throw new RuntimeException(e);
 		}
 
 		//Load config from disk

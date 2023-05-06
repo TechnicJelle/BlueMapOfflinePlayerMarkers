@@ -77,7 +77,12 @@ public final class BlueMapOfflinePlayerMarkers extends JavaPlugin implements Lis
 		Bukkit.getScheduler().runTaskAsynchronously(this, () -> markerHandler.add(e.getPlayer()));
 	}
 
-	public Config getMyConfig() {
+	/**
+	 * The config instance may change when the plugin is reloaded, so this method should be used to get the current config
+	 *
+	 * @return the current config
+	 */
+	public Config getCurrentConfig() {
 		return config;
 	}
 }

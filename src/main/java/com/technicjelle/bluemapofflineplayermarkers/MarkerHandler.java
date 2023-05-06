@@ -61,7 +61,7 @@ public class MarkerHandler {
 		if (!api.getWebApp().getPlayerVisibility(player.getUniqueId())) return;
 
 		//If this player's game mode is disabled on the map, don't add the marker.
-		if (plugin.getMyConfig().hiddenGameModes.contains(gameMode)) return;
+		if (plugin.getCurrentConfig().hiddenGameModes.contains(gameMode)) return;
 
 		// Get BlueMapWorld for the location
 		BlueMapWorld blueMapWorld = api.getWorld(location.getWorld()).orElse(null);
@@ -84,9 +84,9 @@ public class MarkerHandler {
 
 			// get marker-set (or create new marker set if none found)
 			MarkerSet markerSet = map.getMarkerSets().computeIfAbsent(Config.MARKER_SET_ID, id -> MarkerSet.builder()
-					.label(plugin.getMyConfig().markerSetName)
-					.toggleable(plugin.getMyConfig().toggleable)
-					.defaultHidden(plugin.getMyConfig().defaultHidden)
+					.label(plugin.getCurrentConfig().markerSetName)
+					.toggleable(plugin.getCurrentConfig().toggleable)
+					.defaultHidden(plugin.getCurrentConfig().defaultHidden)
 					.build());
 
 			// add marker
@@ -134,7 +134,7 @@ public class MarkerHandler {
 
 			long timeSinceLastPlayed = System.currentTimeMillis() - op.getLastPlayed();
 //			logger.info("Player " + op.getName() + " was last seen " + timeSinceLastPlayed + "ms ago");
-			if (plugin.getMyConfig().expireTimeInHours > 0 && timeSinceLastPlayed > plugin.getMyConfig().expireTimeInHours * 60 * 60 * 1000) {
+			if (plugin.getCurrentConfig().expireTimeInHours > 0 && timeSinceLastPlayed > plugin.getCurrentConfig().expireTimeInHours * 60 * 60 * 1000) {
 				plugin.getLogger().fine("Player " + op.getName() + " was last seen too long ago, skipping");
 				continue;
 			}

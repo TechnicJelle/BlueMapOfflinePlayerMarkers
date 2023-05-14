@@ -155,8 +155,18 @@ public class MarkerHandler {
 
 			//Collect data
 			int gameModeInt = (int) nbtData.get("playerGameType").getValue();
-			long worldUUIDLeast = (long) nbtData.get("WorldUUIDLeast").getValue();
-			long worldUUIDMost = (long) nbtData.get("WorldUUIDMost").getValue();
+			long worldUUIDLeast;
+			try {
+				worldUUIDLeast = (long) nbtData.get("WorldUUIDLeast").getValue();
+			} catch (NullPointerException e) {
+				worldUUIDLeast = (long) nbtData.get("UUIDLeast").getValue();
+			}
+			long worldUUIDMost;
+			try {
+				worldUUIDMost = (long) nbtData.get("WorldUUIDMost").getValue();
+			} catch (NullPointerException e) {
+				worldUUIDMost = (long) nbtData.get("UUIDMost").getValue();
+			}
 			@SuppressWarnings("unchecked") //Apparently this is just how it should be https://discord.com/channels/665868367416131594/771451216499965953/917450319259115550
 			List<Double> position = ((List<DoubleTag>) nbtData.get("Pos").getValue()).stream().map(DoubleTag::getValue).collect(Collectors.toList());
 

@@ -67,11 +67,14 @@ public class MarkerHandler {
 		BlueMapWorld blueMapWorld = api.getWorld(location.getWorld()).orElse(null);
 		if (blueMapWorld == null) return;
 
+		String playerName = player.getName();
+		if (playerName == null)
+			playerName = player.getUniqueId().toString();
 		// Create marker-template
 		// (add 1.8 to y to place the marker at the head-position of the player, like BlueMap does with its player-markers)
 		POIMarker.Builder markerBuilder = POIMarker.builder()
-				.label(player.getName())
-				.detail(player.getName() + " <i>(offline)</i><br>"
+				.label(playerName)
+				.detail(playerName + " <i>(offline)</i><br>"
 						+ "<bmopm-datetime data-timestamp=" + player.getLastPlayed() + "></bmopm-datetime>")
 				.styleClasses("bmopm-offline-player")
 				.position(location.getX(), location.getY() + 1.8, location.getZ());
@@ -93,7 +96,7 @@ public class MarkerHandler {
 			markerSet.put(player.getUniqueId().toString(), markerBuilder.build());
 		}
 
-		plugin.getLogger().info("Marker for " + player.getName() + " added");
+		plugin.getLogger().info("Marker for " + playerName + " added");
 	}
 
 
@@ -155,17 +158,24 @@ public class MarkerHandler {
 
 			//Collect data
 			int gameModeInt = (int) nbtData.get("playerGameType").getValue();
-			long worldUUIDLeast = (long) nbtData.get("WorldUUIDLeast").getValue();
-			long worldUUIDMost = (long) nbtData.get("WorldUUIDMost").getValue();
 			@SuppressWarnings("unchecked") //Apparently this is just how it should be https://discord.com/channels/665868367416131594/771451216499965953/917450319259115550
 			List<Double> position = ((List<DoubleTag>) nbtData.get("Pos").getValue()).stream().map(DoubleTag::getValue).collect(Collectors.toList());
+			World world;
+			try {
+				long worldUUIDLeast = (long) nbtData.get("WorldUUIDLeast").getValue();
+				long worldUUIDMost = (long) nbtData.get("WorldUUIDMost").getValue();
+				UUID worldUUID = new UUID(worldUUIDMost, worldUUIDLeast);
+				world = Bukkit.getWorld(worldUUID);
+			} catch (NullPointerException e) {
+				plugin.getLogger().fine("Can't find WorldUUID for " + op.getUniqueId() + ".  Using Dimension instead.");
+				int dimension = (int) nbtData.get("Dimension").getValue();
+				world = getWorldByDimension(dimension);
+			}
 
 			//Convert to location
-			UUID worldUUID = new UUID(worldUUIDMost, worldUUIDLeast);
-			World w = Bukkit.getWorld(worldUUID);
 			//World doesn't exist or position is broken
-			if (w == null || position.size() != 3) continue;
-			Location loc = new Location(w, position.get(0), position.get(1), position.get(2));
+			if (world == null || position.size() != 3) continue;
+			Location loc = new Location(world, position.get(0), position.get(1), position.get(2));
 
 			//Convert to game mode
 			@SuppressWarnings("deprecation")
@@ -174,5 +184,18 @@ public class MarkerHandler {
 			//Add marker
 			add(op, loc, gameMode);
 		}
+	}
+	/**
+	 * Gets the first world found with a specified dimension.
+	 *
+	 * @param dimension The dimension to search for.
+	 */
+	@SuppressWarnings("deprecation")
+	private World getWorldByDimension(int dimension) {
+		for (World w : Bukkit.getWorlds())
+			if (w.getEnvironment().getId() == dimension)
+				return w;
+		plugin.getLogger().fine("Can't find a good candidate world for dimension " + dimension);
+		return null;
 	}
 }

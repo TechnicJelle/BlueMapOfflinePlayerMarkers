@@ -39,7 +39,18 @@ public class MarkerHandler {
 	 * @param player The player to add the marker for.
 	 */
 	public void add(Player player) {
-		add(player, player.getLocation(), player.getGameMode());
+		add(player, player.getLocation(), player.getGameMode(), System.currentTimeMillis());
+	}
+
+	/**
+	 * Adds a player marker to the map.
+	 *
+	 * @param player The player to add the marker for.
+	 * @param location The location to put the marker at.
+	 * @param gameMode The game mode of the player.
+	 */
+	public void add(OfflinePlayer player, Location location, GameMode gameMode) {
+		add(player, location, gameMode, player.getLastPlayed());
 	}
 
 	/**
@@ -48,8 +59,9 @@ public class MarkerHandler {
 	 * @param player   The player to add the marker for.
 	 * @param location The location to put the marker at.
 	 * @param gameMode The game mode of the player.
+	 * @param lastPlayed The last time the player was online.
 	 */
-	public void add(OfflinePlayer player, Location location, GameMode gameMode) {
+	public void add(OfflinePlayer player, Location location, GameMode gameMode, long lastPlayed) {
 		Optional<BlueMapAPI> optionalApi = BlueMapAPI.getInstance();
 		if (optionalApi.isEmpty()) {
 			plugin.getLogger().warning("Tried to add a marker, but BlueMap wasn't loaded!");
@@ -72,7 +84,7 @@ public class MarkerHandler {
 		POIMarker.Builder markerBuilder = POIMarker.builder()
 				.label(player.getName())
 				.detail(player.getName() + " <i>(offline)</i><br>"
-						+ "<bmopm-datetime data-timestamp=" + player.getLastPlayed() + "></bmopm-datetime>")
+						+ "<bmopm-datetime data-timestamp=" + lastPlayed + "></bmopm-datetime>")
 				.styleClasses("bmopm-offline-player")
 				.position(location.getX(), location.getY() + 1.8, location.getZ());
 

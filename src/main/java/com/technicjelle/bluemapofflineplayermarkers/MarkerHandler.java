@@ -23,6 +23,7 @@ import java.io.IOException;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
+import java.util.logging.Level;
 import java.util.stream.Collectors;
 
 
@@ -45,7 +46,7 @@ public class MarkerHandler {
 	/**
 	 * Adds a player marker to the map.
 	 *
-	 * @param player The player to add the marker for.
+	 * @param player   The player to add the marker for.
 	 * @param location The location to put the marker at.
 	 * @param gameMode The game mode of the player.
 	 */
@@ -56,12 +57,12 @@ public class MarkerHandler {
 	/**
 	 * Adds a player marker to the map.
 	 *
-	 * @param player   The player to add the marker for.
-	 * @param location The location to put the marker at.
-	 * @param gameMode The game mode of the player.
+	 * @param player     The player to add the marker for.
+	 * @param location   The location to put the marker at.
+	 * @param gameMode   The game mode of the player.
 	 * @param lastPlayed The last time the player was online.
 	 */
-	public void add(OfflinePlayer player, Location location, GameMode gameMode, long lastPlayed) {
+	private void add(OfflinePlayer player, Location location, GameMode gameMode, long lastPlayed) {
 		Optional<BlueMapAPI> optionalApi = BlueMapAPI.getInstance();
 		if (optionalApi.isEmpty()) {
 			plugin.getLogger().warning("Tried to add a marker, but BlueMap wasn't loaded!");
@@ -79,11 +80,13 @@ public class MarkerHandler {
 		BlueMapWorld blueMapWorld = api.getWorld(location.getWorld()).orElse(null);
 		if (blueMapWorld == null) return;
 
+		String playerName = player.getName();
+
 		// Create marker-template
 		// (add 1.8 to y to place the marker at the head-position of the player, like BlueMap does with its player-markers)
 		POIMarker.Builder markerBuilder = POIMarker.builder()
-				.label(player.getName())
-				.detail(player.getName() + " <i>(offline)</i><br>"
+				.label(playerName)
+				.detail(playerName + " <i>(offline)</i><br>"
 						+ "<bmopm-datetime data-timestamp=" + lastPlayed + "></bmopm-datetime>")
 				.styleClasses("bmopm-offline-player")
 				.position(location.getX(), location.getY() + 1.8, location.getZ());
@@ -105,7 +108,7 @@ public class MarkerHandler {
 			markerSet.put(player.getUniqueId().toString(), markerBuilder.build());
 		}
 
-		plugin.getLogger().info("Marker for " + player.getName() + " added");
+		plugin.getLogger().info("Marker for " + playerName + " added");
 	}
 
 
@@ -161,7 +164,7 @@ public class MarkerHandler {
 				 NBTInputStream nbtInputStream = new NBTInputStream(fis)) {
 				nbtData = ((CompoundTag) nbtInputStream.readTag()).getValue();
 			} catch (IOException e) {
-				e.printStackTrace();
+				plugin.getLogger().log(Level.WARNING, "Failed to read playerdata file for " + op.getName(), e);
 				continue;
 			}
 

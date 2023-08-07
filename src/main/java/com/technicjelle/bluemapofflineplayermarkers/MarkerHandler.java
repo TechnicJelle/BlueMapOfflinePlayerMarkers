@@ -1,30 +1,27 @@
 package com.technicjelle.bluemapofflineplayermarkers;
 
-import com.flowpowered.nbt.CompoundMap;
-import com.flowpowered.nbt.CompoundTag;
-import com.flowpowered.nbt.DoubleTag;
-import com.flowpowered.nbt.stream.NBTInputStream;
 import com.technicjelle.BMUtils;
+import com.technicjelle.bluemapofflineplayermarkers.models.PlayerNBT;
 import de.bluecolored.bluemap.api.BlueMapAPI;
 import de.bluecolored.bluemap.api.BlueMapMap;
 import de.bluecolored.bluemap.api.BlueMapWorld;
 import de.bluecolored.bluemap.api.markers.MarkerSet;
 import de.bluecolored.bluemap.api.markers.POIMarker;
+import de.bluecolored.bluenbt.BlueNBT;
+import de.bluecolored.bluenbt.NBTReader;
 import org.bukkit.Bukkit;
 import org.bukkit.GameMode;
 import org.bukkit.Location;
 import org.bukkit.OfflinePlayer;
-import org.bukkit.World;
 import org.bukkit.entity.Player;
+import org.jetbrains.annotations.NotNull;
 
-import java.io.File;
-import java.io.FileInputStream;
 import java.io.IOException;
-import java.util.List;
+import java.nio.file.Files;
+import java.nio.file.Path;
 import java.util.Optional;
-import java.util.UUID;
 import java.util.logging.Level;
-import java.util.stream.Collectors;
+import java.util.zip.GZIPInputStream;
 
 
 public class MarkerHandler {
@@ -39,7 +36,7 @@ public class MarkerHandler {
 	 *
 	 * @param player The player to add the marker for.
 	 */
-	public void add(Player player) {
+	public void add(@NotNull Player player) {
 		add(player, player.getLocation(), player.getGameMode(), System.currentTimeMillis());
 	}
 
@@ -50,7 +47,7 @@ public class MarkerHandler {
 	 * @param location The location to put the marker at.
 	 * @param gameMode The game mode of the player.
 	 */
-	public void add(OfflinePlayer player, Location location, GameMode gameMode) {
+	public void add(@NotNull OfflinePlayer player, @NotNull Location location, @NotNull GameMode gameMode) {
 		add(player, location, gameMode, player.getLastPlayed());
 	}
 
@@ -62,7 +59,7 @@ public class MarkerHandler {
 	 * @param gameMode   The game mode of the player.
 	 * @param lastPlayed The last time the player was online.
 	 */
-	private void add(OfflinePlayer player, Location location, GameMode gameMode, long lastPlayed) {
+	private void add(@NotNull OfflinePlayer player, @NotNull Location location, @NotNull GameMode gameMode, long lastPlayed) {
 		Optional<BlueMapAPI> optionalApi = BlueMapAPI.getInstance();
 		if (optionalApi.isEmpty()) {
 			plugin.getLogger().warning("Tried to add a marker, but BlueMap wasn't loaded!");
@@ -139,10 +136,11 @@ public class MarkerHandler {
 	 */
 	public void loadOfflineMarkers() {
 		//I really don't like "getWorlds().get(0)" as a way to get the main world, but as far as I can tell there is no other way
-		File playerDataFolder = new File(Bukkit.getWorlds().get(0).getWorldFolder(), "playerdata");
+		Path playerDataFolder = Bukkit.getWorlds().get(0).getWorldFolder().toPath().resolve("playerdata");
 		//Return if playerdata is missing for some reason.
-		if (!playerDataFolder.exists() || !playerDataFolder.isDirectory()) return;
+		if (!Files.exists(playerDataFolder) || !Files.isDirectory(playerDataFolder)) return;
 
+		BlueNBT nbt = new BlueNBT();
 		for (OfflinePlayer op : Bukkit.getOfflinePlayers()) {
 			//If player is online, ignore (I don't know why the method is called "getOfflinePlayers" when it also contains all online players...)
 			if (op.isOnline()) continue;
@@ -154,40 +152,25 @@ public class MarkerHandler {
 				continue;
 			}
 
-			File dataFile = new File(playerDataFolder, op.getUniqueId() + ".dat");
+			Path dataFile = playerDataFolder.resolve(op.getUniqueId().toString() + ".dat");
 
 			//Failsafe if playerdata doesn't exist (should be impossible but whatever)
-			if (!dataFile.exists()) continue;
+			if (!Files.exists(dataFile)) continue;
 
-			CompoundMap nbtData;
-			try (FileInputStream fis = new FileInputStream(dataFile);
-				 NBTInputStream nbtInputStream = new NBTInputStream(fis)) {
-				nbtData = ((CompoundTag) nbtInputStream.readTag()).getValue();
+			plugin.getLogger().info("Processing playerdata file " + dataFile.getFileName());
+			try (GZIPInputStream in = new GZIPInputStream(Files.newInputStream(dataFile))) {
+				NBTReader reader = new NBTReader(in);
+				PlayerNBT playerNBT = nbt.read(reader, PlayerNBT.class);
+
+				if (playerNBT.getGameMode() == null || playerNBT.getLocation() == null) {
+					plugin.getLogger().warning("Failed to read GameMode or Location from " + dataFile.getFileName());
+					continue;
+				}
+
+				add(op, playerNBT.getLocation(), playerNBT.getGameMode());
 			} catch (IOException e) {
-				plugin.getLogger().log(Level.WARNING, "Failed to read playerdata file for " + op.getName(), e);
-				continue;
+				plugin.getLogger().log(Level.WARNING, "Failed to read playerdata file " + dataFile.getFileName(), e);
 			}
-
-			//Collect data
-			int gameModeInt = (int) nbtData.get("playerGameType").getValue();
-			long worldUUIDLeast = (long) nbtData.get("WorldUUIDLeast").getValue();
-			long worldUUIDMost = (long) nbtData.get("WorldUUIDMost").getValue();
-			@SuppressWarnings("unchecked") //Apparently this is just how it should be https://discord.com/channels/665868367416131594/771451216499965953/917450319259115550
-			List<Double> position = ((List<DoubleTag>) nbtData.get("Pos").getValue()).stream().map(DoubleTag::getValue).collect(Collectors.toList());
-
-			//Convert to location
-			UUID worldUUID = new UUID(worldUUIDMost, worldUUIDLeast);
-			World w = Bukkit.getWorld(worldUUID);
-			//World doesn't exist or position is broken
-			if (w == null || position.size() != 3) continue;
-			Location loc = new Location(w, position.get(0), position.get(1), position.get(2));
-
-			//Convert to game mode
-			@SuppressWarnings("deprecation")
-			GameMode gameMode = GameMode.getByValue(gameModeInt);
-
-			//Add marker
-			add(op, loc, gameMode);
 		}
 	}
 }

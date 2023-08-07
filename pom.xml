@@ -36,8 +36,12 @@
 				<configuration>
 					<relocations>
 						<relocation>
+							<pattern>com.google</pattern>
+							<shadedPattern>com.technicjelle.bluemapofflineplayermarkers.shadow</shadedPattern>
+						</relocation>
+						<relocation>
 							<pattern>org.bstats</pattern>
-							<shadedPattern>com.technicjelle.bluemapofflineplayermarkers</shadedPattern>
+							<shadedPattern>com.technicjelle.bluemapofflineplayermarkers.shadow</shadedPattern>
 						</relocation>
 					</relocations>
 				</configuration>
@@ -105,13 +109,13 @@
 		<dependency>
 			<groupId>com.github.BlueMap-Minecraft</groupId>
 			<artifactId>BlueMapAPI</artifactId>
-			<version>v2.3.0</version>
+			<version>v2.6.0</version>
 			<scope>provided</scope>
 		</dependency>
 		<dependency>
-			<groupId>com.flowpowered</groupId>
-			<artifactId>flow-nbt</artifactId>
-			<version>1.0.1-SNAPSHOT</version>
+			<groupId>com.github.BlueMap-Minecraft</groupId>
+			<artifactId>BlueNBT</artifactId>
+			<version>v1.2.1</version>
 		</dependency>
 		<dependency>
 			<groupId>org.jetbrains</groupId>

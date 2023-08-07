@@ -1,7 +1,7 @@
 package com.technicjelle.bluemapofflineplayermarkers;
 
 import com.technicjelle.BMUtils;
-import com.technicjelle.bluemapofflineplayermarkers.models.NBTPlayer;
+import com.technicjelle.bluemapofflineplayermarkers.models.PlayerNBT;
 import de.bluecolored.bluemap.api.BlueMapAPI;
 import de.bluecolored.bluemap.api.BlueMapMap;
 import de.bluecolored.bluemap.api.BlueMapWorld;
@@ -160,14 +160,14 @@ public class MarkerHandler {
 			plugin.getLogger().info("Processing playerdata file " + dataFile.getFileName());
 			try (GZIPInputStream in = new GZIPInputStream(Files.newInputStream(dataFile))) {
 				NBTReader reader = new NBTReader(in);
-				NBTPlayer nbtPlayer = nbt.read(reader, NBTPlayer.class);
+				PlayerNBT playerNBT = nbt.read(reader, PlayerNBT.class);
 
-				if (nbtPlayer.getGameMode() == null || nbtPlayer.getLocation() == null) {
+				if (playerNBT.getGameMode() == null || playerNBT.getLocation() == null) {
 					plugin.getLogger().warning("Failed to read GameMode or Location from " + dataFile.getFileName());
 					continue;
 				}
 
-				add(op, nbtPlayer.getLocation(), nbtPlayer.getGameMode());
+				add(op, playerNBT.getLocation(), playerNBT.getGameMode());
 			} catch (IOException e) {
 				plugin.getLogger().log(Level.WARNING, "Failed to read playerdata file " + dataFile.getFileName(), e);
 			}

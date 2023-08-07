@@ -10,7 +10,7 @@ import org.jetbrains.annotations.Nullable;
 import java.util.UUID;
 
 @SuppressWarnings({"unused", "MismatchedReadAndWriteOfArray"})
-public class NBTPlayer {
+public class PlayerNBT {
 	@NBTName("playerGameType")
 	private int gameMode;
 

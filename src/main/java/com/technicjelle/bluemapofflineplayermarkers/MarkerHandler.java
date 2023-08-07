@@ -161,13 +161,20 @@ public class MarkerHandler {
 			try (GZIPInputStream in = new GZIPInputStream(Files.newInputStream(dataFile))) {
 				NBTReader reader = new NBTReader(in);
 				PlayerNBT playerNBT = nbt.read(reader, PlayerNBT.class);
+				Location location = playerNBT.getLocation();
+				GameMode gameMode = playerNBT.getGameMode();
 
-				if (playerNBT.getGameMode() == null || playerNBT.getLocation() == null) {
-					plugin.getLogger().warning("Failed to read GameMode or Location from " + dataFile.getFileName());
+				if (location == null) {
+					plugin.getLogger().warning("Failed to read Location from " + dataFile.getFileName());
 					continue;
 				}
 
-				add(op, playerNBT.getLocation(), playerNBT.getGameMode());
+				if (gameMode == null) {
+					plugin.getLogger().warning("Failed to read GameMode from " + dataFile.getFileName());
+					continue;
+				}
+
+				add(op, location, gameMode);
 			} catch (IOException e) {
 				plugin.getLogger().log(Level.WARNING, "Failed to read playerdata file " + dataFile.getFileName(), e);
 			}

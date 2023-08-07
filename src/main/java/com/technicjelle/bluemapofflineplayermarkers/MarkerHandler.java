@@ -17,11 +17,11 @@ import org.bukkit.entity.Player;
 import org.jetbrains.annotations.NotNull;
 
 import java.io.IOException;
-import java.io.InputStream;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.Optional;
 import java.util.logging.Level;
+import java.util.zip.GZIPInputStream;
 
 
 public class MarkerHandler {
@@ -157,7 +157,7 @@ public class MarkerHandler {
 			if (!Files.exists(dataFile)) continue;
 
 			plugin.getLogger().info("Processing playerdata file " + dataFile.getFileName());
-			try (InputStream in = Files.newInputStream(dataFile)) {
+			try (GZIPInputStream in = new GZIPInputStream(Files.newInputStream(dataFile))) {
 				NBTReader reader = new NBTReader(in);
 				BlueNBT nbt = new BlueNBT();
 				NBTPlayer nbtPlayer = nbt.read(reader, NBTPlayer.class);

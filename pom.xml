@@ -115,7 +115,7 @@
 		<dependency>
 			<groupId>com.github.BlueMap-Minecraft</groupId>
 			<artifactId>BlueNBT</artifactId>
-			<version>v1.2.0</version>
+			<version>v1.2.1</version>
 		</dependency>
 		<dependency>
 			<groupId>org.jetbrains</groupId>

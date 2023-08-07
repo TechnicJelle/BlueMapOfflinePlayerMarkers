@@ -140,6 +140,7 @@ public class MarkerHandler {
 		//Return if playerdata is missing for some reason.
 		if (!Files.exists(playerDataFolder) || !Files.isDirectory(playerDataFolder)) return;
 
+		BlueNBT nbt = new BlueNBT();
 		for (OfflinePlayer op : Bukkit.getOfflinePlayers()) {
 			//If player is online, ignore (I don't know why the method is called "getOfflinePlayers" when it also contains all online players...)
 			if (op.isOnline()) continue;
@@ -159,11 +160,7 @@ public class MarkerHandler {
 			plugin.getLogger().info("Processing playerdata file " + dataFile.getFileName());
 			try (GZIPInputStream in = new GZIPInputStream(Files.newInputStream(dataFile))) {
 				NBTReader reader = new NBTReader(in);
-				BlueNBT nbt = new BlueNBT();
 				NBTPlayer nbtPlayer = nbt.read(reader, NBTPlayer.class);
-
-				plugin.getLogger().info("gm:" + nbtPlayer.getGameMode());
-				plugin.getLogger().info("loc:" + nbtPlayer.getLocation());
 
 				if (nbtPlayer.getGameMode() == null || nbtPlayer.getLocation() == null) {
 					plugin.getLogger().warning("Failed to read GameMode or Location from " + dataFile.getFileName());

@@ -32,6 +32,7 @@
 
 .bmopm-offline-player > .bm-marker-poi-label {
 	white-space: nowrap;
+	max-width: unset !important;
 }
 
 .bmopm-offline-player > .bm-marker-poi-label > bmopm-datetime {

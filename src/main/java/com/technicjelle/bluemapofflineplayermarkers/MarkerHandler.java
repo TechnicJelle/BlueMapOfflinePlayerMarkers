@@ -52,7 +52,8 @@ public class MarkerHandler {
 	 * @param gameMode The game mode of the player.
 	 */
 	public void add(@NotNull OfflinePlayer player, @NotNull Location location, @NotNull GameMode gameMode) {
-		add(player.getUniqueId(), player.getName(), location, gameMode, player.getLastPlayed());
+		String playerName = player.getName() != null ? player.getName() : player.getUniqueId().toString();
+		add(player.getUniqueId(), playerName, location, gameMode, player.getLastPlayed());
 	}
 
 	/**

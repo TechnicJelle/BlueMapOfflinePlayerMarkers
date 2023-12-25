@@ -43,8 +43,8 @@ public final class BlueMapOfflinePlayerMarkers extends JavaPlugin implements Lis
 		config = new Config(this);
 
 		try {
-			BMUtils.copyJarResourceToBlueMap(getClassLoader(), api, "style.css", "bmopm.css", false);
-			BMUtils.copyJarResourceToBlueMap(getClassLoader(), api, "script.js", "bmopm.js", false);
+			BMUtils.copyJarResourceToBlueMap(api, getClassLoader(), "style.css", "bmopm.css", false);
+			BMUtils.copyJarResourceToBlueMap(api, getClassLoader(), "script.js", "bmopm.js", false);
 		} catch (IOException e) {
 			getLogger().log(Level.SEVERE, "Failed to copy resources to BlueMap webapp!", e);
 		}

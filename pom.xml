@@ -91,7 +91,7 @@
 		<dependency>
 			<groupId>com.github.TechnicJelle</groupId>
 			<artifactId>BMUtils</artifactId>
-			<version>1.0</version>
+			<version>v1.1</version>
 			<scope>compile</scope>
 		</dependency>
 		<dependency>

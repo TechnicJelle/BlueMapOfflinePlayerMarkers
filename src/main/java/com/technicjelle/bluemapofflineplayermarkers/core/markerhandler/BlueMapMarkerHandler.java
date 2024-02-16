@@ -38,7 +38,7 @@ public class BlueMapMarkerHandler implements MarkerHandler {
 		POIMarker.Builder markerBuilder = POIMarker.builder()
 				.label(player.getPlayerName())
 				.detail(player.getPlayerName() + " <i>(offline)</i><br>"
-						+ "<bmopm-datetime data-timestamp=" + player.getLastPlayed() + "></bmopm-datetime>")
+						+ "<bmopm-datetime data-timestamp=" + player.getLastPlayed().toEpochMilli() + "></bmopm-datetime>")
 				.styleClasses("bmopm-offline-player")
 				.position(position);
 

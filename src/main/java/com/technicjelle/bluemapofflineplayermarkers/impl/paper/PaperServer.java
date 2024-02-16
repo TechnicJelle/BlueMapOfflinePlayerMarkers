@@ -1,11 +1,14 @@
 package com.technicjelle.bluemapofflineplayermarkers.impl.paper;
 
+import com.destroystokyo.paper.profile.PlayerProfile;
 import com.technicjelle.bluemapofflineplayermarkers.common.Server;
 import org.bukkit.Bukkit;
 import org.bukkit.OfflinePlayer;
 import org.bukkit.World;
 import org.bukkit.plugin.java.JavaPlugin;
+import org.jetbrains.annotations.Nullable;
 
+import java.io.IOException;
 import java.nio.file.Path;
 import java.time.Instant;
 import java.util.Optional;
@@ -40,7 +43,21 @@ public class PaperServer implements Server {
 	@Override
 	public String getPlayerName(UUID playerUUID) {
 		OfflinePlayer op = server.getOfflinePlayer(playerUUID);
-		return op.getName();
+		@Nullable String name = op.getName();
+		if (name != null) return name;
+
+		PlayerProfile playerProfile = server.createProfile(playerUUID);
+		if (playerProfile.complete(false)) {
+			name = playerProfile.getName();
+			if (name != null && !name.isBlank()) return name;
+		}
+
+		try {
+			return Server.nameFromMojangAPI(playerUUID);
+		} catch (IOException e) {
+			//If the player is not found, return the UUID as a string
+			return playerUUID.toString();
+		}
 	}
 
 	@Override

@@ -12,6 +12,7 @@ public class MockMarkerHandler implements MarkerHandler {
 	@Override
 	public void add(Player player, BlueMapAPI __) {
 		Singletons.getLogger().finer("UUID: " + player.getPlayerUUID());
+		Singletons.getLogger().finer("Name: " + player.getPlayerName());
 		Singletons.getLogger().finer("Last Played: " + player.getLastPlayed().toEpochMilli());
 		Singletons.getLogger().finer("GameMode: " + player.getPlayerData().getGameMode());
 		Singletons.getLogger().finer("Position: " + player.getPlayerData().getPosition());

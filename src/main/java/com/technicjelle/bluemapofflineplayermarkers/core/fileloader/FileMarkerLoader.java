@@ -67,10 +67,9 @@ public class FileMarkerLoader {
 
 		if (Singletons.getServer().isPlayerOnline(playerUUID)) return; // don't add markers for online players
 
-		String playerName = Singletons.getServer().getPlayerName(playerUUID);
-		Instant lastPlayed = Singletons.getServer().getPlayerLastPlayed(playerUUID);
-
 		if (Singletons.getConfig().checkPlayerLastPlayed(playerUUID)) {
+			String playerName = Singletons.getServer().getPlayerName(playerUUID);
+			Instant lastPlayed = Singletons.getServer().getPlayerLastPlayed(playerUUID);
 			Singletons.getLogger().finer("Player " + playerName + " (" + playerUUID + ") was last online at " + lastPlayed.toString() + ",\n" +
 					"which is more than " + Singletons.getConfig().getExpireTimeInHours() + " hours ago, so not adding marker");
 			return;

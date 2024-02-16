@@ -2,6 +2,7 @@ package mockery;
 
 import com.technicjelle.bluemapofflineplayermarkers.common.Server;
 
+import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
@@ -35,7 +36,11 @@ public class MockServer implements Server {
 
 	@Override
 	public String getPlayerName(UUID playerUUID) {
-		return playerUUID.toString();
+		try {
+			return Server.nameFromMojangAPI(playerUUID);
+		} catch (IOException e) {
+			return playerUUID.toString();
+		}
 	}
 
 	@Override

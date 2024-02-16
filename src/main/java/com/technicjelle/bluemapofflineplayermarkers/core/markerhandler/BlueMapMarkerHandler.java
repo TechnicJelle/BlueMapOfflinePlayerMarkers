@@ -32,7 +32,7 @@ public class BlueMapMarkerHandler implements MarkerHandler {
 		if (position == null) return;
 
 		// Add 1.8 to y to place the marker at the head-position of the player, like BlueMap does with its player-markers
-		position.add(0, 1.8, 0);
+		position = position.add(0, 1.8, 0);
 
 		// Create marker-template
 		POIMarker.Builder markerBuilder = POIMarker.builder()

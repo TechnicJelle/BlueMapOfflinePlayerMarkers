@@ -4,7 +4,7 @@ import mockery.*;
 import org.junit.After;
 import org.junit.Test;
 
-public class LoadOfflineMarkersTests {
+public class LoadOfflineMarkersTest {
 	@After
 	public void cleanup() {
 		Singletons.cleanup();

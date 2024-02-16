@@ -2,6 +2,14 @@ package com.technicjelle.bluemapofflineplayermarkers;
 
 import com.technicjelle.BMUtils;
 import com.technicjelle.UpdateChecker;
+import com.technicjelle.bluemapofflineplayermarkers.core.BMApiStatus;
+import com.technicjelle.bluemapofflineplayermarkers.core.Player;
+import com.technicjelle.bluemapofflineplayermarkers.core.Singletons;
+import com.technicjelle.bluemapofflineplayermarkers.core.fileloader.FileMarkerLoader;
+import com.technicjelle.bluemapofflineplayermarkers.core.markerhandler.BlueMapMarkerHandler;
+import com.technicjelle.bluemapofflineplayermarkers.impl.paper.PaperConfig;
+import com.technicjelle.bluemapofflineplayermarkers.impl.paper.PaperServer;
+import com.technicjelle.bluemapofflineplayermarkers.impl.paper.PlayerBukkitData;
 import de.bluecolored.bluemap.api.BlueMapAPI;
 import org.bstats.bukkit.Metrics;
 import org.bukkit.Bukkit;
@@ -12,13 +20,14 @@ import org.bukkit.event.player.PlayerQuitEvent;
 import org.bukkit.plugin.java.JavaPlugin;
 
 import java.io.IOException;
+import java.util.Optional;
+import java.util.UUID;
 import java.util.function.Consumer;
 import java.util.logging.Level;
 
 public final class BlueMapOfflinePlayerMarkers extends JavaPlugin implements Listener {
-	private Config config;
+	private PaperConfig config;
 	private UpdateChecker updateChecker;
-	private MarkerHandler markerHandler;
 
 	@Override
 	public void onEnable() {
@@ -29,33 +38,35 @@ public final class BlueMapOfflinePlayerMarkers extends JavaPlugin implements Lis
 
 		getServer().getPluginManager().registerEvents(this, this);
 
-		markerHandler = new MarkerHandler(this);
+		config = new PaperConfig(this);
+
+		Singletons.init(new PaperServer(this), getLogger(), config, new BlueMapMarkerHandler(), new BMApiStatus());
 
 		//all actual startup and shutdown logic moved to BlueMapAPI enable/disable methods, so `/bluemap reload` also reloads this plugin
 		BlueMapAPI.onEnable(onEnableListener);
 		BlueMapAPI.onDisable(onDisableListener);
 	}
 
-	Consumer<BlueMapAPI> onEnableListener = api -> {
-		getLogger().info("API Ready! BlueMap Offline Player Markers plugin enabled!");
-		updateChecker.logUpdateMessage(getLogger());
+	final Consumer<BlueMapAPI> onEnableListener = api -> {
+		Singletons.getLogger().info("API Ready! BlueMap Offline Player Markers plugin enabled!");
+		updateChecker.logUpdateMessage(Singletons.getLogger());
 
-		config = new Config(this);
+		config.loadFromPlugin(this);
 
 		try {
 			BMUtils.copyJarResourceToBlueMap(api, getClassLoader(), "style.css", "bmopm.css", false);
 			BMUtils.copyJarResourceToBlueMap(api, getClassLoader(), "script.js", "bmopm.js", false);
 		} catch (IOException e) {
-			getLogger().log(Level.SEVERE, "Failed to copy resources to BlueMap webapp!", e);
+			Singletons.getLogger().log(Level.SEVERE, "Failed to copy resources to BlueMap webapp!", e);
 		}
 
 		//create marker handler and add all offline players in a separate thread, so the server doesn't hang up while it's going
 		//with a delay, so any potential BlueMap SkinProviders have time to load
-		Bukkit.getScheduler().runTaskLaterAsynchronously(this, markerHandler::loadOfflineMarkers, 20 * 5);
+		Bukkit.getScheduler().runTaskLaterAsynchronously(this, FileMarkerLoader::loadOfflineMarkers, 20 * 5);
 	};
 
-	Consumer<BlueMapAPI> onDisableListener = api -> {
-		getLogger().info("API disabled! BlueMap Offline Player Markers shutting down...");
+	final Consumer<BlueMapAPI> onDisableListener = api -> {
+		Singletons.getLogger().info("API disabled! BlueMap Offline Player Markers shutting down...");
 		//not much to do here, actually...
 	};
 
@@ -63,26 +74,43 @@ public final class BlueMapOfflinePlayerMarkers extends JavaPlugin implements Lis
 	public void onDisable() {
 		BlueMapAPI.unregisterListener(onEnableListener);
 		BlueMapAPI.unregisterListener(onDisableListener);
-		getLogger().info("BlueMap Offline Player Markers plugin disabled!");
+		Singletons.getLogger().info("BlueMap Offline Player Markers plugin disabled!");
+		Singletons.cleanup();
 	}
 
 
 	@EventHandler
 	public void onJoin(PlayerJoinEvent e) {
-		Bukkit.getScheduler().runTaskAsynchronously(this, () -> markerHandler.remove(e.getPlayer()));
+		Bukkit.getScheduler().runTaskAsynchronously(this, () -> {
+			org.bukkit.entity.Player player = e.getPlayer();
+			UUID playerUUID = player.getUniqueId();
+
+			Optional<BlueMapAPI> api = BlueMapAPI.getInstance();
+			if (api.isEmpty()) {
+				Singletons.getLogger().warning("BlueMap is not loaded, not removing marker for " + player.getName());
+				return;
+			}
+
+			Singletons.getMarkerHandler().remove(playerUUID, api.get());
+		});
 	}
 
 	@EventHandler
 	public void onLeave(PlayerQuitEvent e) {
-		Bukkit.getScheduler().runTaskAsynchronously(this, () -> markerHandler.add(e.getPlayer()));
-	}
+		Bukkit.getScheduler().runTaskAsynchronously(this, () -> {
+			org.bukkit.entity.Player player = e.getPlayer();
+			UUID playerUUID = player.getUniqueId();
 
-	/**
-	 * The config instance may change when the plugin is reloaded, so this method should be used to get the current config
-	 *
-	 * @return the current config
-	 */
-	public Config getCurrentConfig() {
-		return config;
+			PlayerBukkitData playerBukkitData = new PlayerBukkitData(player);
+			Player playerToAdd = new Player(playerUUID, playerBukkitData);
+
+			Optional<BlueMapAPI> api = BlueMapAPI.getInstance();
+			if (api.isEmpty()) {
+				Singletons.getLogger().warning("BlueMap is not loaded, not adding marker for " + player.getName());
+				return;
+			}
+
+			Singletons.getMarkerHandler().add(playerToAdd, api.get());
+		});
 	}
 }

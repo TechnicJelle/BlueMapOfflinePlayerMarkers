@@ -4,8 +4,6 @@ main: com.technicjelle.bluemapofflineplayermarkers.BlueMapOfflinePlayerMarkers
 api-version: 1.13
 depend:
   - BlueMap
-loadbefore:
-  - BlueMap
 authors:
   - TechnicJelle
   - Mark-255

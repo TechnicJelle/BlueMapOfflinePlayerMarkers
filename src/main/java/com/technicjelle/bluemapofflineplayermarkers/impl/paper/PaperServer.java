@@ -64,7 +64,9 @@ public class PaperServer implements Server {
 	public Optional<UUID> guessWorldUUID(Object object) {
 		if (object instanceof String) {
 			String dimensionString = (String) object;
-			return Optional.ofNullable(server.getWorld(dimensionString).getUID());
+			@Nullable World world = server.getWorld(dimensionString);
+			if (world == null) return Optional.empty();
+			return Optional.of(world.getUID());
 		}
 
 		if (object instanceof Integer) {

@@ -30,6 +30,21 @@ public final class BlueMapOfflinePlayerMarkers extends JavaPlugin implements Lis
 	private UpdateChecker updateChecker;
 
 	@Override
+	public void onLoad() {
+		getLogger().info("BlueMap Offline Player Markers plugin (on)loading...");
+		BlueMapAPI.onEnable(api -> {
+			getLogger().info("BlueMap is enabled! Copying resources to BlueMap webapp and registering them...");
+			try {
+				BMUtils.copyJarResourceToBlueMap(api, getClassLoader(), "style.css", "bmopm.css", false);
+				BMUtils.copyJarResourceToBlueMap(api, getClassLoader(), "script.js", "bmopm.js", false);
+			} catch (IOException e) {
+				Singletons.getLogger().log(Level.SEVERE, "Failed to copy resources to BlueMap webapp!", e);
+			}
+
+		});
+	}
+
+	@Override
 	public void onEnable() {
 		new Metrics(this, 16425);
 
@@ -49,17 +64,10 @@ public final class BlueMapOfflinePlayerMarkers extends JavaPlugin implements Lis
 	}
 
 	final Consumer<BlueMapAPI> onEnableListener = api -> {
-		Singletons.getLogger().info("API Ready! BlueMap Offline Player Markers plugin enabled!");
+		getLogger().info("API Ready! BlueMap Offline Player Markers plugin enabled!");
 		updateChecker.logUpdateMessage(Singletons.getLogger());
 
 		config.loadFromPlugin(this);
-
-		try {
-			BMUtils.copyJarResourceToBlueMap(api, getClassLoader(), "style.css", "bmopm.css", false);
-			BMUtils.copyJarResourceToBlueMap(api, getClassLoader(), "script.js", "bmopm.js", false);
-		} catch (IOException e) {
-			Singletons.getLogger().log(Level.SEVERE, "Failed to copy resources to BlueMap webapp!", e);
-		}
 
 		//create marker handler and add all offline players in a separate thread, so the server doesn't hang up while it's going
 		//with a delay, so any potential BlueMap SkinProviders have time to load

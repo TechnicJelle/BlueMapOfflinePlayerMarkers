@@ -74,11 +74,8 @@ public interface Server {
 	 */
 	static String nameFromMojangAPI(UUID playerUUID) throws IOException {
 		String name = _cachedPlayerNames.get(playerUUID);
-		if (name != null) {
-			Singletons.getLogger().info("Requested player name from Mojang API, but returning from cache instead for " + playerUUID);
-			return name;
-		}
-		Singletons.getLogger().info("Requesting player name from Mojang API for " + playerUUID);
+		if (name != null) return name;
+
 		URL url = new URL("https://sessionserver.mojang.com/session/minecraft/profile/" + playerUUID);
 		URLConnection request = url.openConnection();
 		request.connect();

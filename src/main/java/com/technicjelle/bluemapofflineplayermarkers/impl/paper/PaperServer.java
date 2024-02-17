@@ -2,6 +2,7 @@ package com.technicjelle.bluemapofflineplayermarkers.impl.paper;
 
 import com.destroystokyo.paper.profile.PlayerProfile;
 import com.technicjelle.bluemapofflineplayermarkers.common.Server;
+import com.technicjelle.bluemapofflineplayermarkers.core.Singletons;
 import org.bukkit.Bukkit;
 import org.bukkit.OfflinePlayer;
 import org.bukkit.World;
@@ -15,9 +16,11 @@ import java.util.Optional;
 import java.util.UUID;
 
 public class PaperServer implements Server {
+	final JavaPlugin plugin;
 	final org.bukkit.Server server;
 
 	public PaperServer(JavaPlugin plugin) {
+		this.plugin = plugin;
 		this.server = plugin.getServer();
 	}
 
@@ -25,6 +28,11 @@ public class PaperServer implements Server {
 	public boolean isPlayerOnline(UUID playerUUID) {
 		OfflinePlayer op = server.getOfflinePlayer(playerUUID);
 		return op.isOnline();
+	}
+
+	@Override
+	public Path getConfigFolder() {
+		return plugin.getDataFolder().toPath();
 	}
 
 	@Override

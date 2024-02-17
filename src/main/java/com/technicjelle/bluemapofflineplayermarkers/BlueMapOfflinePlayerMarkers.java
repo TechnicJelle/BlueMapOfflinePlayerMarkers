@@ -41,6 +41,7 @@ public final class BlueMapOfflinePlayerMarkers extends JavaPlugin implements Lis
 		config = new PaperConfig(this);
 
 		Singletons.init(new PaperServer(this), getLogger(), config, new BlueMapMarkerHandler(), new BMApiStatus());
+		Singletons.getServer().startUp();
 
 		//all actual startup and shutdown logic moved to BlueMapAPI enable/disable methods, so `/bluemap reload` also reloads this plugin
 		BlueMapAPI.onEnable(onEnableListener);
@@ -74,6 +75,7 @@ public final class BlueMapOfflinePlayerMarkers extends JavaPlugin implements Lis
 	public void onDisable() {
 		BlueMapAPI.unregisterListener(onEnableListener);
 		BlueMapAPI.unregisterListener(onDisableListener);
+		Singletons.getServer().shutDown();
 		Singletons.getLogger().info("BlueMap Offline Player Markers plugin disabled!");
 		Singletons.cleanup();
 	}

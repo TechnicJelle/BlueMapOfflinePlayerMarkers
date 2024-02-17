@@ -23,6 +23,11 @@ public class MockServer implements Server {
 	}
 
 	@Override
+	public Path getConfigFolder() {
+		return getPlayerDataFolder();
+	}
+
+	@Override
 	public Path getPlayerDataFolder() {
 		Path path = Paths.get("").resolve("src/test/resources/" + playerDataFolderName);
 		assert Files.exists(path);

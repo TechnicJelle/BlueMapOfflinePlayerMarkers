@@ -7,6 +7,7 @@ import org.junit.Test;
 public class LoadOfflineMarkersTest {
 	@After
 	public void cleanup() {
+		Singletons.getServer().shutDown();
 		Singletons.cleanup();
 	}
 
@@ -19,6 +20,7 @@ public class LoadOfflineMarkersTest {
 				new MockMarkerHandler(),
 				new MockBMApiStatus()
 		);
+		Singletons.getServer().startUp();
 		FileMarkerLoader.loadOfflineMarkers();
 	}
 }

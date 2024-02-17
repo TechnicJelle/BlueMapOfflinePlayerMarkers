@@ -32,6 +32,6 @@ public class PlayerBukkitData implements PlayerData {
 
 	@Override
 	public Optional<UUID> getWorldUUID() {
-		return Optional.ofNullable(player.getWorld().getUID());
+		return Optional.of(player.getWorld().getUID());
 	}
 }

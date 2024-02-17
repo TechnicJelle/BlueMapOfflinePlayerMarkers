@@ -2,7 +2,6 @@ package com.technicjelle.bluemapofflineplayermarkers.impl.paper;
 
 import com.destroystokyo.paper.profile.PlayerProfile;
 import com.technicjelle.bluemapofflineplayermarkers.common.Server;
-import com.technicjelle.bluemapofflineplayermarkers.core.Singletons;
 import org.bukkit.Bukkit;
 import org.bukkit.OfflinePlayer;
 import org.bukkit.World;
@@ -72,16 +71,33 @@ public class PaperServer implements Server {
 	public Optional<UUID> guessWorldUUID(Object object) {
 		if (object instanceof String) {
 			String dimensionString = (String) object;
-			@Nullable World world = server.getWorld(dimensionString);
-			if (world == null) return Optional.empty();
-			return Optional.of(world.getUID());
+
+			//Try to get world by name
+			{
+				@Nullable World world = server.getWorld(dimensionString);
+				if (world != null) {
+					return Optional.of(world.getUID());
+				}
+			}
+
+			//Try to get world by dimension
+			for (World world : server.getWorlds()) {
+				switch (world.getEnvironment()) {
+					case NORMAL:
+						if (dimensionString.contains("overworld")) return Optional.of(world.getUID());
+					case NETHER:
+						if (dimensionString.contains("the_nether")) return Optional.of(world.getUID());
+					case THE_END:
+						if (dimensionString.contains("the_end")) return Optional.of(world.getUID());
+				}
+			}
 		}
 
 		if (object instanceof Integer) {
 			int dimensionInt = (Integer) object;
 			for (World world : server.getWorlds()) {
 				@SuppressWarnings("deprecation") int worldID = world.getEnvironment().getId();
-				if (worldID == dimensionInt) return Optional.ofNullable(world.getUID());
+				if (worldID == dimensionInt) return Optional.of(world.getUID());
 			}
 		}
 

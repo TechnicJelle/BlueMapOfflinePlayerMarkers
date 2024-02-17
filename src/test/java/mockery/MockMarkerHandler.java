@@ -21,7 +21,7 @@ public class MockMarkerHandler implements MarkerHandler {
 		if (worldUUID.isEmpty())
 			Singletons.getLogger().warning("World UUID: null");
 		else
-			Singletons.getLogger().finer("World UUID: " + worldUUID);
+			Singletons.getLogger().finer("World UUID: " + worldUUID.get());
 	}
 
 	@Override

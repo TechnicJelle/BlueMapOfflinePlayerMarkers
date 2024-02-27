@@ -81,6 +81,7 @@ public interface Server {
 		request.connect();
 
 		JsonObject response = _gson.fromJson(new InputStreamReader(request.getInputStream()), JsonObject.class);
+		if (response == null) throw new IOException("No response from Mojang API");
 		name = response.get("name").getAsString();
 		_cachedPlayerNames.put(playerUUID, name);
 		return name;

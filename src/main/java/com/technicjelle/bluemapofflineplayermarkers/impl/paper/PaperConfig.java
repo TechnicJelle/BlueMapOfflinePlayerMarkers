@@ -6,6 +6,7 @@ import com.technicjelle.bluemapofflineplayermarkers.core.GameMode;
 import org.bukkit.plugin.java.JavaPlugin;
 
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.List;
 
 public class PaperConfig implements Config {
@@ -30,11 +31,39 @@ public class PaperConfig implements Config {
 		plugin.reloadConfig();
 
 		//Load config values into variables
-		markerSetName = plugin.getConfig().getString("MarkerSetName");
-		toggleable = plugin.getConfig().getBoolean("Toggleable");
-		defaultHidden = plugin.getConfig().getBoolean("DefaultHidden");
-		expireTimeInHours = plugin.getConfig().getLong("ExpireTimeInHours");
-		hiddenGameModes = Config.parseGameModes(plugin.getConfig().getStringList("HiddenGameModes"));
+		markerSetName = plugin.getConfig().getString("MarkerSetName", "Offline Players");
+		toggleable = plugin.getConfig().getBoolean("Toggleable", true);
+		defaultHidden = plugin.getConfig().getBoolean("DefaultHidden", false);
+		expireTimeInHours = plugin.getConfig().getLong("ExpireTimeInHours", 0);
+		hiddenGameModes = Config.parseGameModes(getStringList(plugin, "HiddenGameModes", List.of("spectator")));
+	}
+
+	//Copied/Adapted from org.bukkit.configuration.MemorySection.java
+	@SuppressWarnings("SameParameterValue")
+	private List<String> getStringList(JavaPlugin plugin, String path, List<String> def) {
+		List<?> list = plugin.getConfig().getList(path, def);
+
+		if (list == null) {
+			return new ArrayList<>(0);
+		}
+
+		List<String> result = new ArrayList<>();
+
+		for (Object object : list) {
+			if ((object instanceof String) || (isPrimitiveWrapper(object))) {
+				result.add(String.valueOf(object));
+			}
+		}
+
+		return result;
+	}
+
+	//Copied/Adapted from org.bukkit.configuration.MemorySection.java
+	private boolean isPrimitiveWrapper(Object input) {
+		return input instanceof Integer || input instanceof Boolean ||
+				input instanceof Character || input instanceof Byte ||
+				input instanceof Short || input instanceof Double ||
+				input instanceof Long || input instanceof Float;
 	}
 
 	@Override

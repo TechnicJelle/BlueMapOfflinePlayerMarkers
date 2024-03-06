@@ -1,4 +1,4 @@
-package com.technicjelle.bluemapofflineplayermarkers;
+package com.technicjelle.bluemapofflineplayermarkers.impl.paper;
 
 import com.technicjelle.BMUtils;
 import com.technicjelle.UpdateChecker;
@@ -7,9 +7,6 @@ import com.technicjelle.bluemapofflineplayermarkers.core.Player;
 import com.technicjelle.bluemapofflineplayermarkers.core.Singletons;
 import com.technicjelle.bluemapofflineplayermarkers.core.fileloader.FileMarkerLoader;
 import com.technicjelle.bluemapofflineplayermarkers.core.markerhandler.BlueMapMarkerHandler;
-import com.technicjelle.bluemapofflineplayermarkers.impl.paper.PaperConfig;
-import com.technicjelle.bluemapofflineplayermarkers.impl.paper.PaperServer;
-import com.technicjelle.bluemapofflineplayermarkers.impl.paper.PlayerBukkitData;
 import de.bluecolored.bluemap.api.BlueMapAPI;
 import org.bstats.bukkit.Metrics;
 import org.bukkit.Bukkit;

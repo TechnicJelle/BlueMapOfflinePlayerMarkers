@@ -1,6 +1,6 @@
 name: BlueMapOfflinePlayerMarkers
 version: ${project.version}
-main: com.technicjelle.bluemapofflineplayermarkers.BlueMapOfflinePlayerMarkers
+main: com.technicjelle.bluemapofflineplayermarkers.impl.paper.BlueMapOfflinePlayerMarkers
 api-version: 1.13
 depend:
   - BlueMap

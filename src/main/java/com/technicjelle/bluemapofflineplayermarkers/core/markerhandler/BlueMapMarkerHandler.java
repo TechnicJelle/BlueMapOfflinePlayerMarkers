@@ -3,6 +3,7 @@ package com.technicjelle.bluemapofflineplayermarkers.core.markerhandler;
 import com.flowpowered.math.vector.Vector3d;
 import com.technicjelle.BMUtils;
 import com.technicjelle.bluemapofflineplayermarkers.common.Config;
+import com.technicjelle.bluemapofflineplayermarkers.common.Server;
 import com.technicjelle.bluemapofflineplayermarkers.core.Player;
 import com.technicjelle.bluemapofflineplayermarkers.core.Singletons;
 import de.bluecolored.bluemap.api.BlueMapAPI;
@@ -20,8 +21,13 @@ public class BlueMapMarkerHandler implements MarkerHandler {
 		//If this player's visibility is disabled on the map, don't add the marker.
 		if (!api.getWebApp().getPlayerVisibility(player.getPlayerUUID())) return;
 
+		Config config = Singletons.getConfig();
 		//If this player's game mode is disabled on the map, don't add the marker.
-		if (Singletons.getConfig().isGameModeHidden(player.getPlayerData().getGameMode())) return;
+		if (config.isGameModeHidden(player.getPlayerData().getGameMode())) return;
+
+		Server server = Singletons.getServer();
+		//If this player is banned and the config is set to hide banned players, don't add the marker.
+		if (config.hideBannedPlayers() && server.isPlayerBanned(player.getPlayerUUID())) return;
 
 		// Get BlueMapWorld for the position
 		Optional<UUID> worldUUID = player.getPlayerData().getWorldUUID();
@@ -50,9 +56,9 @@ public class BlueMapMarkerHandler implements MarkerHandler {
 
 			// get marker-set (or create new marker set if none found)
 			MarkerSet markerSet = map.getMarkerSets().computeIfAbsent(Config.MARKER_SET_ID, id -> MarkerSet.builder()
-					.label(Singletons.getConfig().getMarkerSetName())
-					.toggleable(Singletons.getConfig().isToggleable())
-					.defaultHidden(Singletons.getConfig().isDefaultHidden())
+					.label(config.getMarkerSetName())
+					.toggleable(config.isToggleable())
+					.defaultHidden(config.isDefaultHidden())
 					.build());
 
 			// add marker

@@ -16,6 +16,7 @@ public class MockMarkerHandler implements MarkerHandler {
 		Singletons.getLogger().finer("Last Played: " + player.getLastPlayed().toEpochMilli());
 		Singletons.getLogger().finer("GameMode: " + player.getPlayerData().getGameMode());
 		Singletons.getLogger().finer("Position: " + player.getPlayerData().getPosition());
+		Singletons.getLogger().finer("Banned: " + Singletons.getServer().isPlayerBanned(player.getPlayerUUID()));
 
 		Optional<UUID> worldUUID = player.getPlayerData().getWorldUUID();
 		if (worldUUID.isEmpty())

@@ -29,6 +29,8 @@ public interface Config {
 		return getHiddenGameModes().contains(gameMode);
 	}
 
+	boolean hideBannedPlayers();
+
 	/**
 	 * @param playerUUID The player to check.
 	 * @return true if the player should be hidden

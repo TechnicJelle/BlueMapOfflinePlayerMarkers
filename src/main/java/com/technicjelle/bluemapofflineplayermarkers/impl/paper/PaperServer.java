@@ -103,4 +103,10 @@ public class PaperServer implements Server {
 
 		return Optional.empty();
 	}
+
+	@Override
+	public boolean isPlayerBanned(UUID playerUUID) {
+		OfflinePlayer op = server.getOfflinePlayer(playerUUID);
+		return op.isBanned();
+	}
 }

@@ -13,3 +13,6 @@ ExpireTimeInHours: 0
 # If you want to hide players in certain game modes, add them here.
 HiddenGameModes:
   - spectator
+
+# If you want to show players who are banned, set this to false.
+HideBannedPlayers: true

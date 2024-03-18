@@ -30,4 +30,9 @@ public class MockConfig implements Config {
 	public List<GameMode> getHiddenGameModes() {
 		return List.of();
 	}
+
+	@Override
+	public boolean hideBannedPlayers() {
+		return false;
+	}
 }

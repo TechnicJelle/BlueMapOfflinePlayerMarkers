@@ -15,6 +15,7 @@ public class PaperConfig implements Config {
 	private boolean defaultHidden;
 	private long expireTimeInHours;
 	private List<GameMode> hiddenGameModes;
+	private boolean hideBannedPlayers;
 
 	public PaperConfig(JavaPlugin plugin) {
 		loadFromPlugin(plugin);
@@ -36,6 +37,7 @@ public class PaperConfig implements Config {
 		defaultHidden = plugin.getConfig().getBoolean("DefaultHidden", false);
 		expireTimeInHours = plugin.getConfig().getLong("ExpireTimeInHours", 0);
 		hiddenGameModes = Config.parseGameModes(getStringList(plugin, "HiddenGameModes", List.of("spectator")));
+		hideBannedPlayers = plugin.getConfig().getBoolean("HideBannedPlayers", true);
 	}
 
 	//Copied/Adapted from org.bukkit.configuration.MemorySection.java
@@ -89,5 +91,10 @@ public class PaperConfig implements Config {
 	@Override
 	public List<GameMode> getHiddenGameModes() {
 		return hiddenGameModes;
+	}
+
+	@Override
+	public boolean hideBannedPlayers() {
+		return hideBannedPlayers;
 	}
 }

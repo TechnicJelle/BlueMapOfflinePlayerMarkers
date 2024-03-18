@@ -52,4 +52,9 @@ public class MockServer implements Server {
 	public Optional<UUID> guessWorldUUID(Object object) {
 		return Optional.empty();
 	}
+
+	@Override
+	public boolean isPlayerBanned(UUID playerUUID) {
+		return false;
+	}
 }

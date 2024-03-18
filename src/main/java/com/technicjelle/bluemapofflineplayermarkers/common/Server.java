@@ -6,7 +6,12 @@ import com.google.gson.JsonObject;
 import com.google.gson.reflect.TypeToken;
 import com.technicjelle.bluemapofflineplayermarkers.core.Singletons;
 
-import java.io.*;
+import java.io.File;
+import java.io.FileReader;
+import java.io.FileWriter;
+import java.io.IOException;
+import java.io.InputStreamReader;
+import java.io.Writer;
 import java.net.URL;
 import java.net.URLConnection;
 import java.nio.file.Path;
@@ -88,4 +93,6 @@ public interface Server {
 	}
 
 	Optional<UUID> guessWorldUUID(Object object);
+
+	boolean isPlayerBanned(UUID playerUUID);
 }

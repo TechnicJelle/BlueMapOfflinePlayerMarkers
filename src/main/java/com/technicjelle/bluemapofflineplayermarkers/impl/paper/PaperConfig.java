@@ -1,6 +1,6 @@
 package com.technicjelle.bluemapofflineplayermarkers.impl.paper;
 
-import com.technicjelle.MCUtils;
+import com.technicjelle.MCUtils.ConfigUtils;
 import com.technicjelle.bluemapofflineplayermarkers.common.Config;
 import com.technicjelle.bluemapofflineplayermarkers.core.GameMode;
 import org.bukkit.plugin.java.JavaPlugin;
@@ -23,7 +23,7 @@ public class PaperConfig implements Config {
 
 	public void loadFromPlugin(JavaPlugin plugin) {
 		try {
-			MCUtils.copyPluginResourceToConfigDir(plugin, "config.yml", "config.yml", false);
+			ConfigUtils.copyPluginResourceToConfigDir(plugin, "config.yml", "config.yml", false);
 		} catch (IOException e) {
 			throw new RuntimeException(e);
 		}

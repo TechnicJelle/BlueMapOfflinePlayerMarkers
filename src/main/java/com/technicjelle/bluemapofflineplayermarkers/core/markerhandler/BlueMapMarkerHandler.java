@@ -1,7 +1,7 @@
 package com.technicjelle.bluemapofflineplayermarkers.core.markerhandler;
 
 import com.flowpowered.math.vector.Vector3d;
-import com.technicjelle.BMUtils;
+import com.technicjelle.BMUtils.BMSkin;
 import com.technicjelle.bluemapofflineplayermarkers.common.Config;
 import com.technicjelle.bluemapofflineplayermarkers.common.Server;
 import com.technicjelle.bluemapofflineplayermarkers.core.Player;
@@ -52,7 +52,7 @@ public class BlueMapMarkerHandler implements MarkerHandler {
 		// We need to create a separate marker per map, because the map-storage that the icon is saved in
 		// is different for each map
 		for (BlueMapMap map : blueMapWorld.getMaps()) {
-			markerBuilder.icon(BMUtils.getPlayerHeadIconAddress(api, player.getPlayerUUID(), map), 0, 0); // centered with CSS instead
+			markerBuilder.icon(BMSkin.getPlayerHeadIconAddress(api, player.getPlayerUUID(), map), 0, 0); // centered with CSS instead
 
 			// get marker-set (or create new marker set if none found)
 			MarkerSet markerSet = map.getMarkerSets().computeIfAbsent(Config.MARKER_SET_ID, id -> MarkerSet.builder()

@@ -22,6 +22,7 @@ If you want to permanently hide a player from the map, you can also just delete 
 
 For a **Fabric** port of this plugin, please see [this fork by syorito-hatsuki](https://github.com/syorito-hatsuki/BlueMapOfflinePlayerMarkersFabric)  
 For a **Forge** port of this plugin, please see [this fork by FLORIAN4600](https://github.com/FLORIAN4600/BlueMapOfflinePlayerMarkersForge)  
+For a **Folia** port of this plugin, please see [this fork by kgncengiz](https://github.com/kgncengiz/BlueMapOfflinePlayerMarkersFoliaFork)  
 **Disclaimer:** I am not responsible for these ports.
 
 ## [Click here to download!](../../releases/latest)

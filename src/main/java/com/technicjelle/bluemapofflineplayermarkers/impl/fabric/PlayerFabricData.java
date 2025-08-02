@@ -19,7 +19,7 @@ public class PlayerFabricData implements PlayerData {
 
     @Override
     public GameMode getGameMode() {
-        return GameMode.getByValue(player.interactionManager.getGameMode().getId());
+        return GameMode.getByValue(player.interactionManager.getGameMode().getIndex());
     }
 
     @Override

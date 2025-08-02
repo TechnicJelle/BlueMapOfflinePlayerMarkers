@@ -1,7 +1,9 @@
 package com.technicjelle.bluemapofflineplayermarkers.impl.fabric.mixin;
 
-import net.minecraft.nbt.NbtCompound;
+import com.technicjelle.bluemapofflineplayermarkers.impl.fabric.BukkitCodec;
 import net.minecraft.server.network.ServerPlayerEntity;
+import net.minecraft.storage.ReadView;
+import net.minecraft.storage.WriteView;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Unique;
 import org.spongepowered.asm.mixin.injection.At;
@@ -19,17 +21,18 @@ public class ServerPlayerEntityMixin {
         lastPlayed = System.currentTimeMillis();
     }
 
-    @Inject(method = "readCustomDataFromNbt", at = @At(value = "TAIL"))
-    private void readBukkitNbt(NbtCompound nbt, CallbackInfo ci) {
-        lastPlayed = nbt.getLong("lastPlayed");
+    @Inject(method = "readCustomData", at = @At(value = "TAIL"))
+    private void readBukkitNbt(ReadView view, CallbackInfo ci) {
+        var bukkit = view.read("bukkit", BukkitCodec.CODEC);
+        if (bukkit.isEmpty()) return;
+
+        lastPlayed = bukkit.get().lastPlayed();
     }
 
-    @Inject(method = "writeCustomDataToNbt", at = @At(value = "TAIL"))
-    private void writeBukkitNbt(NbtCompound nbt, CallbackInfo ci) {
+    @Inject(method = "writeCustomData", at = @At(value = "TAIL"))
+    private void writeBukkitNbt(WriteView view, CallbackInfo ci) {
         if (lastPlayed != null) {
-            var bukkitNbt = new NbtCompound();
-            bukkitNbt.putLong("lastPlayed", lastPlayed);
-            nbt.put("bukkit", bukkitNbt);
+            view.put("bukkit", BukkitCodec.CODEC, new BukkitCodec(lastPlayed));
         }
     }
 }

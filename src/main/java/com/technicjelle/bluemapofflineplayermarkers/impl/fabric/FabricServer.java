@@ -53,7 +53,7 @@ public class FabricServer implements Server {
     public Instant getPlayerLastPlayed(UUID playerUUID) {
         try {
             NbtCompound nbt = NbtIo.readCompressed(getPlayerDataFolder().resolve(playerUUID + ".dat"), NbtSizeTracker.ofUnlimitedBytes());
-            long millisSinceEpoch = nbt != null ? nbt.getCompound("bukkit").getLong("lastPlayed") : 0;
+            long millisSinceEpoch = nbt != null ? nbt.getCompoundOrEmpty("bukkit").getLong("lastPlayed", 0L) : 0;
             return Instant.ofEpochMilli(millisSinceEpoch);
         } catch (IOException e) {
             throw new RuntimeException(e);

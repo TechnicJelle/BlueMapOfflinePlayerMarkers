@@ -44,9 +44,9 @@ dependencies {
 
     include(modImplementation("de.bluecolored", "bluenbt", "3.3.0"))
 
-    include(modImplementation("maven.modrinth", "fstats", "2023.12.3"))
+    include(modImplementation("maven.modrinth", "fstats", "2025.6.1"))
 
-    include(modImplementation("maven.modrinth", "ducky-updater-lib", "2024.10.2"))
+    include(modImplementation("maven.modrinth", "ducky-updater-lib", "2025.6.1"))
 }
 
 tasks {

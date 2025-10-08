@@ -46,7 +46,7 @@ dependencies {
 
     include(modImplementation("maven.modrinth", "fstats", "2025.6.1"))
 
-    include(modImplementation("maven.modrinth", "ducky-updater-lib", "2025.6.1"))
+    include(modImplementation("maven.modrinth", "ducky-updater-lib", "2025.10.1"))
 }
 
 tasks {

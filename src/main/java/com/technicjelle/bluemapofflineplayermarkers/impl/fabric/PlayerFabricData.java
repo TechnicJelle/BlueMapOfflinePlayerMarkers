@@ -24,7 +24,7 @@ public class PlayerFabricData implements PlayerData {
 
     @Override
     public Vector3d getPosition() {
-        Vec3d location = player.getPos();
+        Vec3d location = player.getEntityPos();
         return new Vector3d(location.getX(), location.getY(), location.getZ());
     }
 
@@ -35,6 +35,6 @@ public class PlayerFabricData implements PlayerData {
 
     @Override
     public Optional<String> getDimension() {
-        return Optional.of(player.getWorld().getDimensionEntry().getKey().get().getValue().toString());
+        return Optional.of(player.getEntityWorld().getDimensionEntry().getKey().get().getValue().toString());
     }
 }

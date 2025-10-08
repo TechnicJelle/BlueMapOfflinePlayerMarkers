@@ -1,12 +1,12 @@
 package com.technicjelle.bluemapofflineplayermarkers.impl.fabric;
 
-import com.mojang.authlib.GameProfile;
 import com.technicjelle.bluemapofflineplayermarkers.common.Server;
 import net.fabricmc.loader.api.FabricLoader;
 import net.minecraft.nbt.NbtCompound;
 import net.minecraft.nbt.NbtIo;
 import net.minecraft.nbt.NbtSizeTracker;
 import net.minecraft.server.MinecraftServer;
+import net.minecraft.server.PlayerConfigEntry;
 import net.minecraft.util.WorldSavePath;
 import org.jetbrains.annotations.Nullable;
 
@@ -62,11 +62,11 @@ public class FabricServer implements Server {
 
     @Override
     public String getPlayerName(UUID playerUUID) {
-        Optional<GameProfile> profile = server.getUserCache().getByUuid(playerUUID);
+        Optional<PlayerConfigEntry> profile = server.getApiServices().nameToIdCache().getByUuid(playerUUID);
 
         if (profile.isEmpty()) throw new RuntimeException("Can't get player from cache with id: " + playerUUID);
 
-        @Nullable String name = profile.get().getName();
+        @Nullable String name = profile.get().name();
         if (name != null) return name;
 
         try {

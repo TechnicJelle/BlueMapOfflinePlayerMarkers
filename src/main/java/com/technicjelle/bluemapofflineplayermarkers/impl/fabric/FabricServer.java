@@ -2,12 +2,12 @@ package com.technicjelle.bluemapofflineplayermarkers.impl.fabric;
 
 import com.technicjelle.bluemapofflineplayermarkers.common.Server;
 import net.fabricmc.loader.api.FabricLoader;
-import net.minecraft.nbt.NbtCompound;
+import net.minecraft.nbt.CompoundTag;
+import net.minecraft.nbt.NbtAccounter;
 import net.minecraft.nbt.NbtIo;
-import net.minecraft.nbt.NbtSizeTracker;
 import net.minecraft.server.MinecraftServer;
-import net.minecraft.server.PlayerConfigEntry;
-import net.minecraft.util.WorldSavePath;
+import net.minecraft.server.players.NameAndId;
+import net.minecraft.world.level.storage.LevelResource;
 import org.jetbrains.annotations.Nullable;
 
 import java.io.IOException;
@@ -36,7 +36,7 @@ public class FabricServer implements Server {
 
     @Override
     public boolean isPlayerOnline(UUID playerUUID) {
-        return server.getPlayerManager().getPlayer(playerUUID) != null;
+        return server.getPlayerList().getPlayer(playerUUID) != null;
     }
 
     @Override
@@ -46,14 +46,14 @@ public class FabricServer implements Server {
 
     @Override
     public Path getPlayerDataFolder() {
-        return server.getSavePath(WorldSavePath.PLAYERDATA);
+        return server.getWorldPath(LevelResource.PLAYER_DATA_DIR);
     }
 
     @Override
     public Instant getPlayerLastPlayed(UUID playerUUID) {
         try {
-            NbtCompound nbt = NbtIo.readCompressed(getPlayerDataFolder().resolve(playerUUID + ".dat"), NbtSizeTracker.ofUnlimitedBytes());
-            long millisSinceEpoch = nbt != null ? nbt.getCompoundOrEmpty("bukkit").getLong("lastPlayed", 0L) : 0;
+            CompoundTag nbt = NbtIo.readCompressed(getPlayerDataFolder().resolve(playerUUID + ".dat"), NbtAccounter.unlimitedHeap());
+            long millisSinceEpoch = nbt.getCompoundOrEmpty("bukkit").getLongOr("lastPlayed", 0L);
             return Instant.ofEpochMilli(millisSinceEpoch);
         } catch (IOException e) {
             throw new RuntimeException(e);
@@ -62,19 +62,13 @@ public class FabricServer implements Server {
 
     @Override
     public String getPlayerName(UUID playerUUID) {
-        Optional<PlayerConfigEntry> profile = server.getApiServices().nameToIdCache().getByUuid(playerUUID);
+        Optional<NameAndId> profile = server.services().nameToIdCache().get(playerUUID);
 
         if (profile.isEmpty()) throw new RuntimeException("Can't get player from cache with id: " + playerUUID);
 
         @Nullable String name = profile.get().name();
-        if (name != null) return name;
+        return name;
 
-        try {
-            return Server.nameFromMojangAPI(playerUUID);
-        } catch (IOException e) {
-            //If the player is not found, return the UUID as a string
-            return playerUUID.toString();
-        }
     }
 
     @Override
@@ -85,6 +79,6 @@ public class FabricServer implements Server {
 
     @Override
     public boolean isPlayerBanned(UUID playerUUID) {
-        return server.getPlayerManager().getUserBanList().toString().contains(playerUUID.toString());
+        return server.getPlayerList().getBans().toString().contains(playerUUID.toString());
     }
 }

@@ -3,29 +3,29 @@ package com.technicjelle.bluemapofflineplayermarkers.impl.fabric;
 import com.flowpowered.math.vector.Vector3d;
 import com.technicjelle.bluemapofflineplayermarkers.common.PlayerData;
 import com.technicjelle.bluemapofflineplayermarkers.core.GameMode;
-import net.minecraft.server.network.ServerPlayerEntity;
-import net.minecraft.util.math.Vec3d;
+import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.world.phys.Vec3;
 
 import java.util.Optional;
 import java.util.UUID;
 
 public class PlayerFabricData implements PlayerData {
 
-    final ServerPlayerEntity player;
+    final ServerPlayer player;
 
-    public PlayerFabricData(ServerPlayerEntity player) {
+    public PlayerFabricData(ServerPlayer player) {
         this.player = player;
     }
 
     @Override
     public GameMode getGameMode() {
-        return GameMode.getByValue(player.interactionManager.getGameMode().getIndex());
+        return GameMode.getByValue(player.gameMode.getGameModeForPlayer().getId());
     }
 
     @Override
     public Vector3d getPosition() {
-        Vec3d location = player.getEntityPos();
-        return new Vector3d(location.getX(), location.getY(), location.getZ());
+        Vec3 location = player.position();
+        return new Vector3d(location.x(), location.y(), location.z());
     }
 
     @Override
@@ -35,6 +35,10 @@ public class PlayerFabricData implements PlayerData {
 
     @Override
     public Optional<String> getDimension() {
-        return Optional.of(player.getEntityWorld().getDimensionEntry().getKey().get().getValue().toString());
+        try (var level = player.level()) {
+            return level.dimensionTypeRegistration().unwrapKey().map(dimensionTypeResourceKey -> dimensionTypeResourceKey.identifier().toString());
+        } catch (Exception e) {
+            return Optional.empty();
+        }
     }
 }

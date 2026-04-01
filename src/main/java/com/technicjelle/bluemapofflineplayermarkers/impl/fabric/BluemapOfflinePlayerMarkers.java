@@ -44,20 +44,20 @@ public class BluemapOfflinePlayerMarkers implements DedicatedServerModInitialize
             }
         });
 
-        ServerPlayConnectionEvents.JOIN.register((handler, sender, server) -> new Thread(() -> {
+        ServerPlayConnectionEvents.JOIN.register((handler, _, _) -> new Thread(() -> {
             Optional<BlueMapAPI> api = BlueMapAPI.getInstance();
             if (api.isEmpty()) {
                 LOGGER.warn("BlueMap is not loaded, not removing marker for {}", handler.player.getName());
                 return;
             }
-            Singletons.getMarkerHandler().remove(handler.player.getUuid(), api.get());
+            Singletons.getMarkerHandler().remove(handler.player.getUUID(), api.get());
         }).start());
 
-        ServerPlayConnectionEvents.DISCONNECT.register((handler, server) -> new Thread(() -> {
+        ServerPlayConnectionEvents.DISCONNECT.register((handler, _) -> new Thread(() -> {
             try {
                 Thread.sleep(100);
                 PlayerFabricData playerFabricData = new PlayerFabricData(handler.player);
-                Player playerToAdd = new Player(handler.player.getUuid(), playerFabricData);
+                Player playerToAdd = new Player(handler.player.getUUID(), playerFabricData);
 
                 Optional<BlueMapAPI> api = BlueMapAPI.getInstance();
                 if (api.isEmpty()) {
@@ -71,7 +71,7 @@ public class BluemapOfflinePlayerMarkers implements DedicatedServerModInitialize
             }
         }).start());
 
-        ServerLifecycleEvents.SERVER_STOPPING.register(server -> {
+        ServerLifecycleEvents.SERVER_STOPPING.register(_ -> {
             BlueMapAPI.unregisterListener(onEnableListener);
             BlueMapAPI.unregisterListener(onDisableListener);
             Singletons.getServer().shutDown();
@@ -80,7 +80,7 @@ public class BluemapOfflinePlayerMarkers implements DedicatedServerModInitialize
         });
     }
 
-    private final Consumer<BlueMapAPI> onEnableListener = api -> {
+    private final Consumer<BlueMapAPI> onEnableListener = _ -> {
         LOGGER.info("API Ready! BlueMap Offline Player Markers plugin enabled!");
 
         new Thread(() -> {
@@ -93,5 +93,5 @@ public class BluemapOfflinePlayerMarkers implements DedicatedServerModInitialize
         }).start();
     };
 
-    final Consumer<BlueMapAPI> onDisableListener = api -> LOGGER.info("API disabled! BlueMap Offline Player Markers shutting down...");
+    final Consumer<BlueMapAPI> onDisableListener = _ -> LOGGER.info("API disabled! BlueMap Offline Player Markers shutting down...");
 }

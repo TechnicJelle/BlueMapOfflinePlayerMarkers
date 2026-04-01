@@ -1,25 +1,19 @@
-import org.jetbrains.kotlin.gradle.dsl.JvmTarget
-import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
+val archivesBaseName: String by project
+val mavenGroup: String by project
+val modVersion: String by project
+
+val javaVersion = JavaVersion.VERSION_25
 
 plugins {
-    id("fabric-loom")
-    kotlin("jvm")
+    alias(libs.plugins.fabric.loom)
 }
 
 base {
-    val archivesBaseName: String by project
     archivesName.set(archivesBaseName)
 }
 
-val javaVersion = JavaVersion.VERSION_21
-val loaderVersion: String by project
-val minecraftVersion: String by project
-
-val modVersion: String by project
-version = modVersion
-
-val mavenGroup: String by project
 group = mavenGroup
+version = modVersion
 
 repositories {
     maven("https://api.modrinth.com/maven")
@@ -27,29 +21,39 @@ repositories {
 }
 
 dependencies {
-    minecraft("com.mojang", "minecraft", minecraftVersion)
+    minecraft(libs.minecraft)
 
-    val yarnMappings: String by project
-    mappings("net.fabricmc", "yarn", yarnMappings, null, "v2")
+    implementation(libs.fabric.loader)
+    implementation(libs.fabric.api)
+    implementation(libs.bluemap.api)
 
-    modImplementation("net.fabricmc", "fabric-loader", loaderVersion)
+    embed(libs.bluenbt)
+    embed(libs.bmutils)
+    embed(libs.mcutils)
 
-    val fabricVersion: String by project
-    modImplementation("net.fabricmc.fabric-api", "fabric-api", fabricVersion)
+    embed(libs.fstats)
+    embed(libs.ducky.updater)
+}
 
-    modImplementation("de.bluecolored.bluemap", "BlueMapAPI", "2.7.2")
-
-    include(modImplementation("com.technicjelle", "BMUtils", "4.3.0"))
-    include(modImplementation("com.technicjelle", "MCUtils", "2.0"))
-
-    include(modImplementation("de.bluecolored", "bluenbt", "3.3.0"))
-
-    include(modImplementation("maven.modrinth", "fstats", "2025.6.1"))
-
-    include(modImplementation("maven.modrinth", "ducky-updater-lib", "2025.10.1"))
+java {
+    toolchain {
+        languageVersion.set(JavaLanguageVersion.of(javaVersion.toString()))
+    }
+    sourceCompatibility = javaVersion
+    targetCompatibility = javaVersion
+    withSourcesJar()
 }
 
 tasks {
+    jar {
+        from("LICENSE")
+    }
+
+    processResources {
+        filesMatching("fabric.mod.json") {
+            expand(mutableMapOf("version" to project.version))
+        }
+    }
 
     withType<JavaCompile> {
         options.encoding = "UTF-8"
@@ -57,33 +61,9 @@ tasks {
         targetCompatibility = javaVersion.toString()
         options.release.set(javaVersion.toString().toInt())
     }
+}
 
-    withType<KotlinCompile> {
-        compilerOptions {
-            jvmTarget.set(JvmTarget.JVM_21)
-        }
-    }
-
-    jar {
-        from("LICENSE")
-    }
-
-    processResources {
-        filesMatching("fabric.mod.json") {
-            expand(
-                mutableMapOf(
-                    "version" to project.version,
-                )
-            )
-        }
-    }
-
-    java {
-        toolchain {
-            languageVersion.set(JavaLanguageVersion.of(javaVersion.toString()))
-        }
-        sourceCompatibility = javaVersion
-        targetCompatibility = javaVersion
-        withSourcesJar()
-    }
+fun DependencyHandlerScope.embed(projectDependency: Provider<MinimalExternalModuleDependency>) {
+    implementation(projectDependency)
+    include(projectDependency)
 }

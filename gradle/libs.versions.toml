@@ -1,0 +1,25 @@
+[versions]
+bluemap-api = "2.7.7"
+bluenbt = "3.5.0"
+bm-utils = "5.0.1"
+ducky-updater = "2026.3.1"
+fabric-api = "0.145.1+26.1"
+fabric-loader = "0.18.5"
+fabric-loom = "1.15-SNAPSHOT"
+fstats = "2026.3.1"
+mc-utils = "2.0"
+minecraft = "26.1"
+
+[libraries]
+minecraft = { module = "com.mojang:minecraft", version.ref = "minecraft" }
+fabric-loader = { module = "net.fabricmc:fabric-loader", version.ref = "fabric-loader" }
+fabric-api = { module = "net.fabricmc.fabric-api:fabric-api", version.ref = "fabric-api" }
+ducky-updater = { module = "maven.modrinth:ducky-updater-lib", version.ref = "ducky-updater" }
+fstats = { module = "maven.modrinth:fstats", version.ref = "fstats" }
+bluemap-api = { module = "de.bluecolored:bluemap-api", version.ref = "bluemap-api" }
+bluenbt = { module = "de.bluecolored:bluenbt", version.ref = "bluenbt" }
+bmutils = { module = "com.technicjelle:BMUtils", version.ref = "bm-utils" }
+mcutils = { module = "com.technicjelle:MCUtils", version.ref = "mc-utils" }
+
+[plugins]
+fabric-loom = { id = "net.fabricmc.fabric-loom", version.ref = "fabric-loom" }

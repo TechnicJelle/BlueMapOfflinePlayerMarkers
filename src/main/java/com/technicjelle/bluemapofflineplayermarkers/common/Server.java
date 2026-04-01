@@ -4,6 +4,7 @@ import com.google.common.reflect.TypeToken;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import com.google.gson.JsonObject;
+import com.google.gson.Strictness;
 import com.technicjelle.bluemapofflineplayermarkers.core.Singletons;
 
 import java.io.*;
@@ -19,7 +20,7 @@ import java.util.UUID;
 
 public interface Server {
     Gson _gson = new GsonBuilder()
-            .setLenient()
+            .setStrictness(Strictness.LENIENT)
 //			.setPrettyPrinting() //Disabled to discourage people from editing the file by hand
             .enableComplexMapKeySerialization()
             .create();

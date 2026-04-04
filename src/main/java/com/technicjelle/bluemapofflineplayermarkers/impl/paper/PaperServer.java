@@ -43,7 +43,7 @@ public class PaperServer implements Server {
 	@Override
 	public Instant getPlayerLastPlayed(UUID playerUUID) {
 		OfflinePlayer op = server.getOfflinePlayer(playerUUID);
-		long millisSinceEpoch = op.getLastPlayed();
+		long millisSinceEpoch = op.getLastSeen();
 		return Instant.ofEpochMilli(millisSinceEpoch);
 	}
 

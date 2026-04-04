@@ -9,6 +9,7 @@ import org.bukkit.plugin.java.JavaPlugin;
 import org.jetbrains.annotations.Nullable;
 
 import java.io.IOException;
+import java.nio.file.Files;
 import java.nio.file.Path;
 import java.time.Instant;
 import java.util.Optional;
@@ -36,8 +37,18 @@ public class PaperServer implements Server {
 
 	@Override
 	public Path getPlayerDataFolder() {
-		//I really don't like "getWorlds().get(0)" as a way to get the main world, but as far as I can tell there is no other way
-		return Bukkit.getWorlds().get(0).getWorldFolder().toPath().resolve("playerdata");
+		//I really don't like "getWorlds().get(0)" as a way to get the main world, but as far as I can tell, there is no other way
+		Path worldFolder = Bukkit.getWorlds().get(0).getWorldFolder().toPath();
+
+		//Ouch. I should find a better way to get there...
+		Path newPlayerDataFolder = worldFolder.resolve("..").resolve("..").resolve("..").resolve("players").resolve("data");
+		if (Files.exists(newPlayerDataFolder)) return newPlayerDataFolder;
+
+		//Pre 26.1 format:
+		Path oldPlayerDataFolder = worldFolder.resolve("playerdata");
+		if (Files.exists(oldPlayerDataFolder)) return oldPlayerDataFolder;
+
+		return Path.of("");
 	}
 
 	@Override

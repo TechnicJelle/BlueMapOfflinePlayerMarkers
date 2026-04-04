@@ -69,9 +69,7 @@ public class PaperServer implements Server {
 
 	@Override
 	public Optional<UUID> guessWorldUUID(Object object) {
-		if (object instanceof String) {
-			String dimensionString = (String) object;
-
+		if (object instanceof String dimensionString) {
 			//Try to get world by name
 			{
 				@Nullable World world = server.getWorld(dimensionString);

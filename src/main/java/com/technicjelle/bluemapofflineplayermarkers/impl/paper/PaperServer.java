@@ -37,15 +37,17 @@ public class PaperServer implements Server {
 
 	@Override
 	public Path getPlayerDataFolder() {
-		//I really don't like "getWorlds().get(0)" as a way to get the main world, but as far as I can tell, there is no other way
-		Path worldFolder = Bukkit.getWorlds().get(0).getWorldFolder().toPath();
+		//I really don't like "getWorlds().getFirst()" as a way to get the main world, but as far as I can tell, there is no other way
+		Path dimensionFolder = Bukkit.getWorlds().getFirst().getWorldFolder().toPath();
 
-		//Ouch. I should find a better way to get there...
-		Path newPlayerDataFolder = worldFolder.resolve("..").resolve("..").resolve("..").resolve("players").resolve("data");
+		//This is how BlueMap does it too... https://github.com/BlueMap-Minecraft/BlueMap/blob/c115f26d7b2330b83c368396b4f84c9ce53945ae/implementations/paper/src/main/java/de/bluecolored/bluemap/bukkit/BukkitWorld.java#L55
+		Path worldFolder = dimensionFolder.getParent().getParent().getParent();
+
+		Path newPlayerDataFolder = worldFolder.resolve("players").resolve("data");
 		if (Files.exists(newPlayerDataFolder)) return newPlayerDataFolder;
 
 		//Pre 26.1 format:
-		Path oldPlayerDataFolder = worldFolder.resolve("playerdata");
+		Path oldPlayerDataFolder = dimensionFolder.resolve("playerdata");
 		if (Files.exists(oldPlayerDataFolder)) return oldPlayerDataFolder;
 
 		return Path.of("");

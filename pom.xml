@@ -100,7 +100,7 @@
 		<dependency>
 			<groupId>com.technicjelle</groupId>
 			<artifactId>BMUtils</artifactId>
-			<version>4.2.1</version>
+			<version>5.1.0</version>
 			<scope>compile</scope>
 		</dependency>
 		<dependency>

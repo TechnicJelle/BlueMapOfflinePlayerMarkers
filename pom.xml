@@ -14,7 +14,7 @@
 	<url>https://github.com/TechnicJelle/BlueMapOfflinePlayerMarkers/</url>
 
 	<properties>
-		<java.version>16</java.version>
+		<java.version>25</java.version>
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
 	</properties>
 
@@ -24,7 +24,7 @@
 			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>
 				<artifactId>maven-compiler-plugin</artifactId>
-				<version>3.13.0</version>
+				<version>3.15.0</version>
 				<configuration>
 					<release>${java.version}</release>
 				</configuration>
@@ -32,7 +32,7 @@
 			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>
 				<artifactId>maven-shade-plugin</artifactId>
-				<version>3.6.0</version>
+				<version>3.6.2</version>
 				<configuration>
 					<relocations>
 						<relocation>
@@ -129,13 +129,13 @@
 		<dependency>
 			<groupId>org.jetbrains</groupId>
 			<artifactId>annotations</artifactId>
-			<version>23.1.0</version>
+			<version>26.1.0</version>
 			<scope>compile</scope>
 		</dependency>
 		<dependency>
 			<groupId>org.bstats</groupId>
 			<artifactId>bstats-bukkit</artifactId>
-			<version>3.0.2</version>
+			<version>3.2.1</version>
 			<scope>compile</scope>
 		</dependency>
 	</dependencies>

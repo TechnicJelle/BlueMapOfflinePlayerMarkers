@@ -35,9 +35,12 @@ public class PlayerFabricData implements PlayerData {
 
     @Override
     public Optional<String> getDimension() {
-        try (var level = player.level()) {
+        try {
+            // NEVER USE TRY WITH RESOURCE WITH LEVEL!!!
+            @SuppressWarnings("resource") var level = player.level();
             return level.dimensionTypeRegistration().unwrapKey().map(dimensionTypeResourceKey -> dimensionTypeResourceKey.identifier().toString());
         } catch (Exception e) {
+            BluemapOfflinePlayerMarkers.LOGGER.error("Failed to get dimension", e);
             return Optional.empty();
         }
     }

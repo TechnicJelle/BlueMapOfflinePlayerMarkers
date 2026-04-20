@@ -8,7 +8,6 @@ import net.minecraft.nbt.NbtIo;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.players.NameAndId;
 import net.minecraft.world.level.storage.LevelResource;
-import org.jetbrains.annotations.Nullable;
 
 import java.io.IOException;
 import java.nio.file.Path;
@@ -66,9 +65,7 @@ public class FabricServer implements Server {
 
         if (profile.isEmpty()) throw new RuntimeException("Can't get player from cache with id: " + playerUUID);
 
-        @Nullable String name = profile.get().name();
-        return name;
-
+        return profile.get().name();
     }
 
     @Override

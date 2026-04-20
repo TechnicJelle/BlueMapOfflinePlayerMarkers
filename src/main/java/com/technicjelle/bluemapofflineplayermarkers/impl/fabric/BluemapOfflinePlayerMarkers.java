@@ -25,6 +25,7 @@ public class BluemapOfflinePlayerMarkers implements DedicatedServerModInitialize
     public void onInitializeServer() {
 
         ServerLifecycleEvents.SERVER_STARTED.register(server -> {
+            LOGGER.info("BlueMap Offline Player Markers plugin enabled!");
             FabricConfig config = new FabricConfig();
             config.createAndReadConfig();
             Singletons.init(new FabricServer(server), null, config, new BlueMapMarkerHandler(), new BMApiStatus());
@@ -34,6 +35,7 @@ public class BluemapOfflinePlayerMarkers implements DedicatedServerModInitialize
         });
 
         LOGGER.info("BlueMap Offline Player Markers plugin (on)loading...");
+
         BlueMapAPI.onEnable(api -> {
             LOGGER.info("BlueMap is enabled! Copying resources to BlueMap webapp and registering them...");
             try {

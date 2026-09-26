@@ -98,7 +98,7 @@
 		<dependency>
 			<groupId>com.technicjelle</groupId>
 			<artifactId>UpdateChecker</artifactId>
-			<version>2.5.1</version>
+			<version>3.0.1</version>
 			<scope>compile</scope>
 		</dependency>
 		<dependency>
